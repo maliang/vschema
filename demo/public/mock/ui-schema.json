@@ -1,0 +1,40 @@
+[
+  {
+    "com": "div",
+    "props": { "style": "background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); padding: 24px; border-radius: 12px; color: white; margin-bottom: 16px;" },
+    "children": [
+      { "com": "h3", "props": { "style": "margin: 0 0 8px 0;" }, "children": "🎉 动态加载的 UI" },
+      { "com": "p", "props": { "style": "margin: 0; opacity: 0.9;" }, "children": "这个卡片是通过 uiApi 从远程加载的 JsonNode 结构渲染的" }
+    ]
+  },
+  {
+    "com": "div",
+    "props": { "style": "display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px;" },
+    "children": [
+      {
+        "com": "div",
+        "props": { "style": "background: #e0f2fe; padding: 16px; border-radius: 8px; text-align: center;" },
+        "children": [
+          { "com": "div", "props": { "style": "font-size: 32px; margin-bottom: 8px;" }, "children": "📊" },
+          { "com": "div", "props": { "style": "font-weight: bold; color: #0369a1;" }, "children": "数据分析" }
+        ]
+      },
+      {
+        "com": "div",
+        "props": { "style": "background: #dcfce7; padding: 16px; border-radius: 8px; text-align: center;" },
+        "children": [
+          { "com": "div", "props": { "style": "font-size: 32px; margin-bottom: 8px;" }, "children": "⚡" },
+          { "com": "div", "props": { "style": "font-weight: bold; color: #15803d;" }, "children": "高性能" }
+        ]
+      },
+      {
+        "com": "div",
+        "props": { "style": "background: #fef3c7; padding: 16px; border-radius: 8px; text-align: center;" },
+        "children": [
+          { "com": "div", "props": { "style": "font-size: 32px; margin-bottom: 8px;" }, "children": "🔧" },
+          { "com": "div", "props": { "style": "font-weight: bold; color: #b45309;" }, "children": "易配置" }
+        ]
+      }
+    ]
+  }
+]

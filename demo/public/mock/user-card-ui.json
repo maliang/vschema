@@ -1,0 +1,61 @@
+[
+  {
+    "com": "div",
+    "props": { "style": "background: white; border-radius: 12px; overflow: hidden; box-shadow: 0 4px 12px rgba(0,0,0,0.1);" },
+    "children": [
+      {
+        "com": "div",
+        "props": { "style": "background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); padding: 24px; color: white;" },
+        "children": [
+          { 
+            "com": "div", 
+            "props": { "style": "width: 80px; height: 80px; background: white; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 36px; margin-bottom: 16px; color: #667eea;" },
+            "children": "{{ user?.name?.charAt(0) || '?' }}"
+          },
+          { "com": "h3", "props": { "style": "margin: 0 0 4px 0;" }, "children": "{{ user?.name || '加载中...' }}" },
+          { "com": "p", "props": { "style": "margin: 0; opacity: 0.9;" }, "children": "{{ user?.email || '' }}" }
+        ]
+      },
+      {
+        "com": "div",
+        "props": { "style": "padding: 24px;" },
+        "children": [
+          {
+            "com": "div",
+            "props": { "style": "display: grid; grid-template-columns: repeat(2, 1fr); gap: 16px;" },
+            "children": [
+              {
+                "com": "div",
+                "children": [
+                  { "com": "div", "props": { "style": "color: #999; font-size: 12px; margin-bottom: 4px;" }, "children": "📞 电话" },
+                  { "com": "div", "props": { "style": "font-weight: 500;" }, "children": "{{ user?.phone || '-' }}" }
+                ]
+              },
+              {
+                "com": "div",
+                "children": [
+                  { "com": "div", "props": { "style": "color: #999; font-size: 12px; margin-bottom: 4px;" }, "children": "🌐 网站" },
+                  { "com": "div", "props": { "style": "font-weight: 500;" }, "children": "{{ user?.website || '-' }}" }
+                ]
+              },
+              {
+                "com": "div",
+                "children": [
+                  { "com": "div", "props": { "style": "color: #999; font-size: 12px; margin-bottom: 4px;" }, "children": "🏢 公司" },
+                  { "com": "div", "props": { "style": "font-weight: 500;" }, "children": "{{ user?.company?.name || '-' }}" }
+                ]
+              },
+              {
+                "com": "div",
+                "children": [
+                  { "com": "div", "props": { "style": "color: #999; font-size: 12px; margin-bottom: 4px;" }, "children": "📍 城市" },
+                  { "com": "div", "props": { "style": "font-weight: 500;" }, "children": "{{ user?.address?.city || '-' }}" }
+                ]
+              }
+            ]
+          }
+        ]
+      }
+    ]
+  }
+]
