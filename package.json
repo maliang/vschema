@@ -1,5 +1,5 @@
 {
-  "name": "vschema",
+  "name": "@maliang47/vschema",
   "version": "1.0.0",
   "description": "A Vue 3 plugin for building dynamic UI from JSON Schema - declarative, reactive, and powerful",
   "type": "module",
@@ -50,6 +50,11 @@
     "vschema"
   ],
   "license": "MIT",
+  "author": "maliang <maliang47@foxmail.com>",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/user/vschema.git"
+  },
   "peerDependencies": {
     "vue": "^3.3.0"
   },

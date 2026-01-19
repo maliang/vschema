@@ -8,7 +8,7 @@ VSchema 支持注册和使用自定义 Vue 组件。
 
 ```typescript
 import { createApp } from 'vue';
-import { createVSchemaPlugin } from 'vschema';
+import { createVSchemaPlugin } from '@maliang47/vschema';
 import MyButton from './components/MyButton.vue';
 import MyCard from './components/MyCard.vue';
 
@@ -25,7 +25,7 @@ app.use(createVSchemaPlugin({
 ### 按需注册（createVSchema）
 
 ```typescript
-import { createVSchema } from 'vschema';
+import { createVSchema } from '@maliang47/vschema';
 import MyButton from './components/MyButton.vue';
 
 const VSchema = createVSchema({
@@ -36,7 +36,7 @@ const VSchema = createVSchema({
 ### 运行时注册
 
 ```typescript
-import { useComponentRegistry } from 'vschema';
+import { useComponentRegistry } from '@maliang47/vschema';
 import MyButton from './components/MyButton.vue';
 
 const registry = useComponentRegistry();
@@ -131,7 +131,7 @@ const emit = defineEmits<{
 ### Element Plus
 
 ```typescript
-import { createVSchemaPlugin } from 'vschema';
+import { createVSchemaPlugin } from '@maliang47/vschema';
 import { ElButton, ElInput, ElSelect, ElOption } from 'element-plus';
 
 app.use(createVSchemaPlugin({

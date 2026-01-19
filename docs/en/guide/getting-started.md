@@ -19,8 +19,8 @@ VSchema allows you to describe UI structure with JSON objects instead of writing
 </template>
 
 <script setup lang="ts">
-import { VSchema } from 'vschema';
-import type { JsonNode } from 'vschema';
+import { VSchema } from '@maliang47/vschema';
+import type { JsonNode } from '@maliang47/vschema';
 
 const schema: JsonNode = {
   data: { count: 0 },

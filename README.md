@@ -1,6 +1,6 @@
 # VSchema
 
-[![npm version](https://img.shields.io/npm/v/vschema.svg)](https://www.npmjs.com/package/vschema)
+[![npm version](https://img.shields.io/npm/v/@maliang47/vschema.svg)](https://www.npmjs.com/package/@maliang47/vschema)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
 一个强大的 Vue 3 插件，通过 JSON Schema 声明式构建动态 UI。支持响应式数据、计算属性、事件处理、条件渲染、循环渲染、API 调用、WebSocket 等完整功能。
@@ -28,11 +28,11 @@
 ## 📦 安装
 
 ```bash
-pnpm add vschema
+pnpm add @maliang47/vschema
 # 或
-npm install vschema
+npm install @maliang47/vschema
 # 或
-yarn add vschema
+yarn add @maliang47/vschema
 ```
 
 ## 🚀 快速开始
@@ -41,7 +41,7 @@ yarn add vschema
 
 ```typescript
 import { createApp } from 'vue';
-import { VSchemaPlugin } from 'vschema';
+import { VSchemaPlugin } from '@maliang47/vschema';
 import App from './App.vue';
 
 const app = createApp(App);
@@ -63,8 +63,8 @@ app.mount('#app');
 </template>
 
 <script setup lang="ts">
-import { VSchema } from 'vschema';
-import type { JsonNode } from 'vschema';
+import { VSchema } from '@maliang47/vschema';
+import type { JsonNode } from '@maliang47/vschema';
 
 const schema: JsonNode = {
   data: { count: 0 },
@@ -84,7 +84,7 @@ const schema: JsonNode = {
 ### 方式三：创建自定义配置的组件
 
 ```typescript
-import { createVSchema } from 'vschema';
+import { createVSchema } from '@maliang47/vschema';
 import MyButton from './components/MyButton.vue';
 
 // 创建带配置的 VSchema 组件
@@ -109,7 +109,7 @@ export default VSchema;
 </template>
 
 <script setup lang="ts">
-import type { JsonNode } from 'vschema';
+import type { JsonNode } from '@maliang47/vschema';
 
 const schema: JsonNode = {
   data: { count: 0 },
@@ -138,7 +138,7 @@ const schema: JsonNode = {
 </template>
 
 <script setup lang="ts">
-import type { JsonNode } from 'vschema';
+import type { JsonNode } from '@maliang47/vschema';
 
 const schema: JsonNode = {
   data: { form: { username: '', password: '' } },
@@ -372,7 +372,7 @@ const externalMethods = {
 ## 🧩 注册自定义组件
 
 ```typescript
-import { useComponentRegistry } from 'vschema';
+import { useComponentRegistry } from '@maliang47/vschema';
 import MyButton from './MyButton.vue';
 
 const registry = useComponentRegistry();
@@ -383,7 +383,7 @@ registry.register('MyButton', MyButton);
 
 ```typescript
 import { createApp } from 'vue';
-import { createVSchemaPlugin } from 'vschema';
+import { createVSchemaPlugin } from '@maliang47/vschema';
 
 const app = createApp(App);
 

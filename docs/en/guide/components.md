@@ -7,7 +7,7 @@ VSchema supports registering and using custom Vue components.
 ### Global Registration (Plugin Config)
 
 ```typescript
-import { createVSchemaPlugin } from 'vschema';
+import { createVSchemaPlugin } from '@maliang47/vschema';
 import MyButton from './components/MyButton.vue';
 
 app.use(createVSchemaPlugin({
@@ -18,7 +18,7 @@ app.use(createVSchemaPlugin({
 ### On-demand Registration (createVSchema)
 
 ```typescript
-import { createVSchema } from 'vschema';
+import { createVSchema } from '@maliang47/vschema';
 import MyButton from './components/MyButton.vue';
 
 const VSchema = createVSchema({
@@ -29,7 +29,7 @@ const VSchema = createVSchema({
 ### Runtime Registration
 
 ```typescript
-import { useComponentRegistry } from 'vschema';
+import { useComponentRegistry } from '@maliang47/vschema';
 import MyButton from './components/MyButton.vue';
 
 const registry = useComponentRegistry();

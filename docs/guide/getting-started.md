@@ -19,8 +19,8 @@ VSchema 允许你用 JSON 对象描述 UI 结构，而不是编写 Vue 模板。
 </template>
 
 <script setup lang="ts">
-import { VSchema } from 'vschema';
-import type { JsonNode } from 'vschema';
+import { VSchema } from '@maliang47/vschema';
+import type { JsonNode } from '@maliang47/vschema';
 
 const schema: JsonNode = {
   data: { count: 0 },

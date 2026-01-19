@@ -1152,5 +1152,5 @@ const demoPageSchema: JsonNode = {
 </script>
 
 <template>
-  <JsonRenderer :schema="demoPageSchema" />
+  <VSchema :schema="demoPageSchema" />
 </template>

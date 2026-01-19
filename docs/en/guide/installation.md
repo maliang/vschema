@@ -5,15 +5,15 @@
 ::: code-group
 
 ```bash [pnpm]
-pnpm add vschema
+pnpm add @maliang47/vschema
 ```
 
 ```bash [npm]
-npm install vschema
+npm install @maliang47/vschema
 ```
 
 ```bash [yarn]
-yarn add vschema
+yarn add @maliang47/vschema
 ```
 
 :::
@@ -29,7 +29,7 @@ Suitable when VSchema is needed throughout the application:
 ```typescript
 // main.ts
 import { createApp } from 'vue';
-import { VSchemaPlugin } from 'vschema';
+import { VSchemaPlugin } from '@maliang47/vschema';
 import App from './App.vue';
 
 const app = createApp(App);
@@ -55,8 +55,8 @@ Suitable when only used in some pages, reduces bundle size:
 </template>
 
 <script setup lang="ts">
-import { VSchema } from 'vschema';
-import type { JsonNode } from 'vschema';
+import { VSchema } from '@maliang47/vschema';
+import type { JsonNode } from '@maliang47/vschema';
 
 const schema: JsonNode = {
   com: 'div',
@@ -71,7 +71,7 @@ Suitable when you need to pre-configure API URL or register custom components:
 
 ```typescript
 // components/ConfiguredVSchema.ts
-import { createVSchema } from 'vschema';
+import { createVSchema } from '@maliang47/vschema';
 import MyButton from './MyButton.vue';
 
 export const VSchema = createVSchema({
@@ -85,7 +85,7 @@ export const VSchema = createVSchema({
 VSchema is fully written in TypeScript with complete type definitions:
 
 ```typescript
-import type { JsonNode, GlobalConfig, Action } from 'vschema';
+import type { JsonNode, GlobalConfig, Action } from '@maliang47/vschema';
 
 const schema: JsonNode = {
   com: 'div',

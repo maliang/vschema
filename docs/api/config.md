@@ -5,7 +5,7 @@ VSchema 插件的全局配置选项。
 ## 配置方式
 
 ```typescript
-import { createVSchemaPlugin } from 'vschema';
+import { createVSchemaPlugin } from '@maliang47/vschema';
 
 app.use(createVSchemaPlugin({
   baseURL: 'https://api.example.com',

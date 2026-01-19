@@ -5,15 +5,15 @@
 ::: code-group
 
 ```bash [pnpm]
-pnpm add vschema
+pnpm add @maliang47/vschema
 ```
 
 ```bash [npm]
-npm install vschema
+npm install @maliang47/vschema
 ```
 
 ```bash [yarn]
-yarn add vschema
+yarn add @maliang47/vschema
 ```
 
 :::
@@ -29,7 +29,7 @@ VSchema 提供三种使用方式，根据需求选择：
 ```typescript
 // main.ts
 import { createApp } from 'vue';
-import { VSchemaPlugin } from 'vschema';
+import { VSchemaPlugin } from '@maliang47/vschema';
 import App from './App.vue';
 
 const app = createApp(App);
@@ -55,8 +55,8 @@ app.mount('#app');
 </template>
 
 <script setup lang="ts">
-import { VSchema } from 'vschema';
-import type { JsonNode } from 'vschema';
+import { VSchema } from '@maliang47/vschema';
+import type { JsonNode } from '@maliang47/vschema';
 
 const schema: JsonNode = {
   com: 'div',
@@ -71,7 +71,7 @@ const schema: JsonNode = {
 
 ```typescript
 // components/ConfiguredVSchema.ts
-import { createVSchema } from 'vschema';
+import { createVSchema } from '@maliang47/vschema';
 import MyButton from './MyButton.vue';
 import MyCard from './MyCard.vue';
 
@@ -107,7 +107,7 @@ import { VSchema } from './components/ConfiguredVSchema';
 ```typescript
 // main.ts
 import { createApp } from 'vue';
-import { createVSchemaPlugin } from 'vschema';
+import { createVSchemaPlugin } from '@maliang47/vschema';
 import MyButton from './components/MyButton.vue';
 
 const app = createApp(App);
@@ -131,7 +131,7 @@ app.mount('#app');
 VSchema 完全使用 TypeScript 编写，提供完整的类型定义：
 
 ```typescript
-import type { JsonNode, GlobalConfig, Action } from 'vschema';
+import type { JsonNode, GlobalConfig, Action } from '@maliang47/vschema';
 
 const schema: JsonNode = {
   com: 'div',
