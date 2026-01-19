@@ -837,6 +837,10 @@ export class Renderer {
         'onUpdate:modelValue': (newValue: any) => {
           this.setStateByPath(runtimeContext.state, modelPath, newValue);
         },
+        // 兼容 Naive UI 等使用 value 而非 modelValue 的组件
+        'onUpdate:value': (newValue: any) => {
+          this.setStateByPath(runtimeContext.state, modelPath, newValue);
+        },
       },
     };
   }

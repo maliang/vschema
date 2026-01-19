@@ -4,7 +4,7 @@
  */
 
 import type { App, Component, Plugin } from 'vue';
-import { defineComponent, h } from 'vue';
+import { defineComponent, h, shallowRef, watch } from 'vue';
 import type { PluginOptions, GlobalConfig } from '../types/config';
 import type { JsonNode } from '../types/schema';
 import { Renderer, createRenderer } from '../renderer/Renderer';
@@ -74,8 +74,30 @@ function createVSchemaComponent(renderer: Renderer): Component {
     emits: null as any,
     setup(props, { emit, attrs }) {
       const parser = new Parser();
+      
+      // 缓存渲染后的组件，避免每次渲染都重新创建
+      // 使用 shallowRef 避免深度响应式追踪组件对象
+      const cachedComponent = shallowRef<Component | null>(null);
+      // 缓存上一次的 schema 用于比较
+      let lastSchemaKey: string | null = null;
 
-      return () => {
+      /**
+       * 生成 schema 的唯一标识
+       * 用于判断 schema 是否发生变化
+       */
+      function getSchemaKey(schema: JsonNode | string): string {
+        if (typeof schema === 'string') {
+          return schema;
+        }
+        // 对于对象，使用 JSON 序列化作为 key
+        // 注意：这里只比较 schema 结构，不包括 initialData 和 methods
+        return JSON.stringify(schema);
+      }
+
+      /**
+       * 创建渲染组件
+       */
+      function createRenderedComponent(): Component | null {
         try {
           let node: JsonNode;
           
@@ -86,9 +108,7 @@ function createVSchemaComponent(renderer: Renderer): Component {
                 type: 'parse',
                 errors: parseResult.errors,
               });
-              return h('div', { 
-                style: { color: 'red', padding: '8px' } 
-              }, `JSON 解析错误: ${parseResult.errors?.map(e => e.message).join(', ')}`);
+              return null;
             }
             node = parseResult.node;
           } else {
@@ -106,25 +126,53 @@ function createVSchemaComponent(renderer: Renderer): Component {
             };
           }
 
-          const RenderedComponent = renderer.render(node);
-          
-          const eventListeners: Record<string, any> = {};
-          for (const key in attrs) {
-            if (key.startsWith('on') && typeof attrs[key] === 'function') {
-              eventListeners[key] = attrs[key];
-            }
-          }
-          
-          return h(RenderedComponent, eventListeners);
+          return renderer.render(node);
         } catch (error) {
           emit('error', {
             type: 'render',
             error,
           });
+          return null;
+        }
+      }
+
+      // 监听 schema 变化，只有当 schema 真正变化时才重新创建组件
+      watch(
+        () => props.schema,
+        (newSchema) => {
+          const newKey = getSchemaKey(newSchema);
+          if (newKey !== lastSchemaKey) {
+            lastSchemaKey = newKey;
+            cachedComponent.value = createRenderedComponent();
+          }
+        },
+        { immediate: true }
+      );
+
+      return () => {
+        if (!cachedComponent.value) {
+          // 解析或渲染失败时显示错误
+          if (typeof props.schema === 'string') {
+            const parseResult = parser.parse(props.schema);
+            if (!parseResult.success) {
+              return h('div', { 
+                style: { color: 'red', padding: '8px' } 
+              }, `JSON 解析错误: ${parseResult.errors?.map(e => e.message).join(', ')}`);
+            }
+          }
           return h('div', { 
             style: { color: 'red', padding: '8px' } 
-          }, `渲染错误: ${error instanceof Error ? error.message : String(error)}`);
+          }, '渲染错误');
         }
+
+        const eventListeners: Record<string, any> = {};
+        for (const key in attrs) {
+          if (key.startsWith('on') && typeof attrs[key] === 'function') {
+            eventListeners[key] = attrs[key];
+          }
+        }
+        
+        return h(cachedComponent.value, eventListeners);
       };
     },
   });
