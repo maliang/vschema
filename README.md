@@ -28,9 +28,9 @@
 ## 📦 安装
 
 ```bash
-npm install vschema
-# 或
 pnpm add vschema
+# 或
+npm install vschema
 # 或
 yarn add vschema
 ```

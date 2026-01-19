@@ -28,9 +28,9 @@ English | [简体中文](./README.md)
 ## 📦 Installation
 
 ```bash
-npm install vschema
-# or
 pnpm add vschema
+# or
+npm install vschema
 # or
 yarn add vschema
 ```
