@@ -53,7 +53,7 @@
   "author": "maliang <maliang47@foxmail.com>",
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/maliang47/vschema.git"
+    "url": "git+https://github.com/maliang/vschema.git"
   },
   "peerDependencies": {
     "vue": "^3.3.0"
