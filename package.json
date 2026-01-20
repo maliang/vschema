@@ -1,6 +1,6 @@
 {
   "name": "@maliang47/vschema",
-  "version": "1.1.2",
+  "version": "1.2.0",
   "description": "A Vue 3 plugin for building dynamic UI from JSON Schema - declarative, reactive, and powerful",
   "type": "module",
   "main": "./dist/index.cjs",

@@ -8,8 +8,18 @@ import type {
   EvaluationContext,
   FetchResult,
 } from '../types/runtime';
-import type { GlobalConfig, RequestConfig } from '../types/config';
+import type { GlobalConfig, RequestConfig, ResponseFormatConfig } from '../types/config';
 import type { FetchAction } from '../types/schema';
+
+/**
+ * 默认响应格式配置
+ */
+const DEFAULT_RESPONSE_FORMAT: Required<ResponseFormatConfig> = {
+  codeField: 'code',
+  msgField: 'msg',
+  dataField: 'data',
+  successCode: 200,
+};
 
 export class DataFetcher implements IDataFetcher {
   private config: GlobalConfig = {};
@@ -163,6 +173,40 @@ export class DataFetcher implements IDataFetcher {
   }
 
   /**
+   * 获取响应格式配置（合并默认值）
+   */
+  private getResponseFormat(): Required<ResponseFormatConfig> {
+    return {
+      ...DEFAULT_RESPONSE_FORMAT,
+      ...this.config.responseFormat,
+    };
+  }
+
+  /**
+   * 检查业务状态码是否表示成功
+   * @param code 业务状态码
+   */
+  private isSuccessCode(code: number): boolean {
+    const { successCode } = this.getResponseFormat();
+    if (Array.isArray(successCode)) {
+      return successCode.includes(code);
+    }
+    return code === successCode;
+  }
+
+  /**
+   * 从响应中提取字段值
+   * @param response 响应对象
+   * @param field 字段名
+   */
+  private getResponseField(response: any, field: string): any {
+    if (!response || typeof response !== 'object') {
+      return undefined;
+    }
+    return response[field];
+  }
+
+  /**
    * 处理响应
    */
   private async handleResponse(response: Response, requestId: string): Promise<FetchResult> {
@@ -228,7 +272,59 @@ export class DataFetcher implements IDataFetcher {
         }
       }
 
-      // 提取数据（根据 responseDataPath 配置）
+      // 检查业务状态码（仅对 JSON 响应进行检查）
+      if (typeof data === 'object' && data !== null) {
+        const format = this.getResponseFormat();
+        const businessCode = this.getResponseField(data, format.codeField);
+        
+        // 如果响应中包含业务状态码字段，则进行业务状态码判断
+        if (businessCode !== undefined) {
+          if (!this.isSuccessCode(businessCode)) {
+            // 业务状态码表示失败
+            const msg = this.getResponseField(data, format.msgField) || '请求失败';
+            const error = new Error(msg);
+            (error as any).code = businessCode;
+            (error as any).response = data;
+
+            // 执行错误拦截器
+            if (this.config.errorInterceptor) {
+              try {
+                await Promise.resolve(this.config.errorInterceptor(error));
+              } catch (interceptorError) {
+                this.loadingStates.set(requestId, false);
+                return {
+                  success: false,
+                  error: interceptorError instanceof Error 
+                    ? interceptorError 
+                    : new Error(String(interceptorError)),
+                  status: response.status,
+                  response: data,
+                };
+              }
+            }
+
+            this.loadingStates.set(requestId, false);
+            return {
+              success: false,
+              error,
+              status: response.status,
+              response: data,
+            };
+          }
+
+          // 业务成功，提取 data 字段
+          const extractedData = this.getResponseField(data, format.dataField);
+          this.loadingStates.set(requestId, false);
+          return {
+            success: true,
+            data: extractedData,
+            status: response.status,
+            response: data,
+          };
+        }
+      }
+
+      // 无业务状态码的情况，使用 responseDataPath 提取数据
       const extractedData = this.extractData(data);
 
       this.loadingStates.set(requestId, false);
