@@ -341,11 +341,34 @@ app.use(createVSchemaPlugin({
     'Authorization': 'Bearer token'
   },
   responseDataPath: 'data',
+  // API response format configuration
+  responseFormat: {
+    codeField: 'code',      // Business status code field, default 'code'
+    msgField: 'msg',        // Message field, default 'msg'
+    dataField: 'data',      // Data field, default 'data'
+    successCode: 200,       // Success code, default 200, supports array like [0, 200]
+  },
   components: {
     MyButton: MyButtonComponent
   }
 }));
 ```
+
+### Response Format Configuration
+
+VSchema supports custom backend API response format, default format is `{ code, msg, data }`:
+
+```typescript
+// Custom response format
+responseFormat: {
+  codeField: 'status',      // Backend uses 'status' field
+  msgField: 'message',      // Backend uses 'message' field
+  dataField: 'result',      // Backend uses 'result' field
+  successCode: [0, 200],    // Both 0 and 200 indicate success
+}
+```
+
+When the API returns a business status code not equal to `successCode`, the `catch` callback is automatically triggered, and the error message is extracted from the `msgField` field.
 
 ## 🎹 Event Modifiers
 

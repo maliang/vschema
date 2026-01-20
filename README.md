@@ -393,11 +393,34 @@ app.use(createVSchemaPlugin({
     'Authorization': 'Bearer token'
   },
   responseDataPath: 'data',
+  // API 响应格式配置
+  responseFormat: {
+    codeField: 'code',      // 业务状态码字段名，默认 'code'
+    msgField: 'msg',        // 消息字段名，默认 'msg'
+    dataField: 'data',      // 数据字段名，默认 'data'
+    successCode: 200,       // 业务成功状态码，默认 200，支持数组如 [0, 200]
+  },
   components: {
     MyButton: MyButtonComponent
   }
 }));
 ```
+
+### 响应格式配置
+
+VSchema 支持自定义后端 API 返回格式，默认格式为 `{ code, msg, data }`：
+
+```typescript
+// 自定义响应格式
+responseFormat: {
+  codeField: 'status',      // 后端使用 status 字段
+  msgField: 'message',      // 后端使用 message 字段
+  dataField: 'result',      // 后端使用 result 字段
+  successCode: [0, 200],    // 0 和 200 都表示成功
+}
+```
+
+当 API 返回的业务状态码不等于 `successCode` 时，会自动触发 `catch` 回调，错误信息从 `msgField` 字段提取。
 
 ## 🎹 事件修饰符
 
