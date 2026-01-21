@@ -193,6 +193,7 @@ export function createVSchemaPlugin(options: PluginOptions = {}): Plugin {
         errorInterceptor: options.errorInterceptor,
         baseURL: options.baseURL,
         defaultHeaders: options.defaultHeaders,
+        responseFormat: options.responseFormat,
       };
 
       const registry = new ComponentRegistry();
