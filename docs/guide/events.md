@@ -146,6 +146,23 @@ VSchema 提供灵活的事件绑定和动作系统，支持 Vue 事件修饰符�
 
 可用变量：`state`, `computed`, `$event`, `$response`, `$error`, `$methods`
 
+### ws - WebSocket
+
+```json
+{
+  "events": {
+    "click": {
+      "ws": "wss://example.com/socket",
+      "op": "connect",
+      "id": "main",
+      "onMessage": { "set": "lastMessage", "value": "{{ $response }}" }
+    }
+  }
+}
+```
+
+详细用法请参考 [WebSocket 指南](/guide/websocket)。
+
 ## 多个动作
 
 使用数组执行多个动作：

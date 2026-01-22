@@ -52,13 +52,14 @@ interface EmitAction {
 
 ```typescript
 interface FetchAction {
-  fetch: string;           // API 地址
-  method?: string;         // 请求方法
+  fetch: string;           // API 地址，支持表达式
+  method?: 'GET' | 'POST' | 'PUT' | 'DELETE' | 'PATCH';  // 请求方法
   headers?: object;        // 请求头
   body?: any;              // 请求体
-  then?: Action | Action[];    // 成功回调
-  catch?: Action | Action[];   // 失败回调
-  finally?: Action | Action[]; // 完成回调
+  then?: Action | Action[];    // 成功回调，可访问 $response
+  catch?: Action | Action[];   // 失败回调，可访问 $error
+  finally?: Action | Action[]; // 完成回调（无论成功失败）
+  ignoreBaseURL?: boolean;     // 是否忽略全局 baseURL
 }
 ```
 
@@ -69,7 +70,17 @@ interface FetchAction {
   "method": "PUT",
   "body": { "name": "{{ form.name }}" },
   "then": { "set": "user", "value": "{{ $response }}" },
-  "catch": { "set": "error", "value": "{{ $error.message }}" }
+  "catch": { "set": "error", "value": "{{ $error.message }}" },
+  "finally": { "set": "loading", "value": false }
+}
+```
+
+忽略全局 baseURL（用于本地 mock 等场景）：
+```json
+{
+  "fetch": "/local-mock/data.json",
+  "ignoreBaseURL": true,
+  "then": { "set": "mockData", "value": "{{ $response }}" }
 }
 ```
 
@@ -130,24 +141,70 @@ interface ScriptAction {
 ## ws - WebSocket
 
 ```typescript
-interface WsAction {
-  ws: string;              // 连接地址或连接 ID
-  op: 'connect' | 'send' | 'close';
-  id?: string;             // 连接标识
-  data?: any;              // 发送的数据
-  onOpen?: Action;
-  onMessage?: Action;
-  onError?: Action;
-  onClose?: Action;
+interface WebSocketAction {
+  ws: string;              // 连接地址（connect 时）或连接 ID（send/close 时）
+  op?: 'connect' | 'send' | 'close';  // 操作类型，默认 'connect'
+  id?: string;             // 连接标识，connect 时设置后，后续 op 通过 ws 引用该 id
+
+  // 连接配置（connect 时使用）
+  protocols?: string | string[];  // WebSocket 子协议
+  timeout?: number;               // 连接超时（毫秒）
+
+  // 发送配置（send 时使用）
+  message?: any;                  // 发送的消息内容
+  sendAs?: 'text' | 'json';       // 消息序列化方式
+
+  // 接收配置
+  responseType?: 'text' | 'json' | 'auto';  // 消息解析方式，默认 'auto'
+
+  // 生命周期回调
+  onOpen?: Action | Action[];
+  onMessage?: Action | Action[];
+  onError?: Action | Action[];
+  onClose?: Action | Action[];
+
+  // 流程回调（每次 op 触发一次）
+  then?: Action | Action[];
+  catch?: Action | Action[];
+  finally?: Action | Action[];
+
+  // 关闭配置（close 时使用）
+  code?: number;                  // 关闭状态码
+  reason?: string;                // 关闭原因
 }
 ```
 
 示例：
+
+建立连接：
 ```json
 {
   "ws": "wss://example.com/socket",
   "op": "connect",
   "id": "main",
-  "onMessage": { "set": "lastMessage", "value": "{{ $response }}" }
+  "timeout": 5000,
+  "onOpen": { "set": "connected", "value": true },
+  "onMessage": { "set": "lastMessage", "value": "{{ $response }}" },
+  "onError": { "set": "error", "value": "{{ $error.message }}" }
+}
+```
+
+发送消息：
+```json
+{
+  "ws": "main",
+  "op": "send",
+  "message": { "type": "chat", "content": "{{ inputText }}" },
+  "sendAs": "json"
+}
+```
+
+关闭连接：
+```json
+{
+  "ws": "main",
+  "op": "close",
+  "code": 1000,
+  "reason": "用户主动断开"
 }
 ```

@@ -80,12 +80,16 @@ Use <span v-pre>`{{ expression }}`</span> to embed JavaScript expressions in str
 
 VSchema provides various action types for handling user interactions:
 
-| Action | Description | Example |
-|--------|-------------|---------|
-| `set` | Modify state | `{ set: 'count', value: '{{ count + 1 }}' }` |
-| `call` | Call method | `{ call: 'submit' }` |
-| `emit` | Emit event | `{ emit: 'change', payload: '{{ data }}' }` |
-| `fetch` | API call | `{ fetch: '/api/data', then: { set: 'result', value: '{{ $response }}' } }` |
+| Action | Description |
+|--------|-------------|
+| `set` | Modify state |
+| `call` | Call method |
+| `emit` | Emit event |
+| `fetch` | API call |
+| `ws` | WebSocket operations |
+| `if` | Conditional execution |
+| `script` | Custom script |
+| `copy` | Copy to clipboard |
 
 ## Next Steps
 

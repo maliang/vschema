@@ -56,3 +56,57 @@ Complete JsonNode type definition.
 | Property | Type | Description |
 |----------|------|-------------|
 | `slots` | `Record<string, SlotConfig>` | Slot definitions |
+
+## Complete Type Definition
+
+```typescript
+interface JsonNode {
+  com: string;
+  props?: Record<string, any>;
+  children?: JsonNode[] | string;
+  
+  data?: Record<string, any>;
+  computed?: Record<string, string>;
+  methods?: Record<string, Action | Action[]>;
+  
+  if?: string;
+  show?: string;
+  for?: string;
+  key?: string;
+  model?: string;
+  ref?: string;
+  
+  events?: Record<string, Action | Action[]>;
+  
+  onMounted?: Action | Action[];
+  onUnmounted?: Action | Action[];
+  onUpdated?: Action | Action[];
+  watch?: Record<string, WatchConfig | Action>;
+  
+  initApi?: string | ApiConfig;
+  uiApi?: string | ApiConfig;
+  
+  slots?: Record<string, JsonNode[] | SlotConfig>;
+}
+
+interface WatchConfig {
+  handler: Action | Action[];
+  immediate?: boolean;
+  deep?: boolean;
+}
+
+interface ApiConfig {
+  url: string;
+  method?: 'GET' | 'POST' | 'PUT' | 'DELETE' | 'PATCH';
+  headers?: Record<string, string>;
+  body?: any;
+  then?: Action | Action[];
+  catch?: Action | Action[];
+  ignoreBaseURL?: boolean;
+}
+
+interface SlotConfig {
+  content: JsonNode[];
+  slotProps?: string;
+}
+```

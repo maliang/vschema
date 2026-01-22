@@ -77,6 +77,21 @@ Use `events` property to bindEvents:
 }
 ```
 
+Available variables: `state`, `computed`, `$event`, `$response`, `$error`, `$methods`
+
+### ws - WebSocket
+
+```json
+{
+  "ws": "wss://example.com/socket",
+  "op": "connect",
+  "id": "main",
+  "onMessage": { "set": "lastMessage", "value": "{{ $response }}" }
+}
+```
+
+See [WebSocket Guide](/en/guide/websocket) for full documentation.
+
 ## Event Modifiers
 
 Support Vue event modifier syntax:

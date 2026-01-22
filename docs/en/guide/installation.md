@@ -73,11 +73,57 @@ Suitable when you need to pre-configure API URL or register custom components:
 // components/ConfiguredVSchema.ts
 import { createVSchema } from '@maliang47/vschema';
 import MyButton from './MyButton.vue';
+import MyCard from './MyCard.vue';
 
 export const VSchema = createVSchema({
+  // API base URL
   baseURL: 'https://api.example.com',
-  components: { MyButton }
+  // Default request headers
+  defaultHeaders: {
+    'Authorization': 'Bearer token'
+  },
+  // Register custom components
+  components: {
+    MyButton,
+    MyCard,
+  },
 });
+```
+
+```vue
+<template>
+  <VSchema :schema="schema" />
+</template>
+
+<script setup>
+import { VSchema } from './components/ConfiguredVSchema';
+</script>
+```
+
+## Global Registration with Config
+
+If you need global registration with configuration:
+
+```typescript
+// main.ts
+import { createApp } from 'vue';
+import { createVSchemaPlugin } from '@maliang47/vschema';
+import MyButton from './components/MyButton.vue';
+
+const app = createApp(App);
+
+app.use(createVSchemaPlugin({
+  baseURL: 'https://api.example.com',
+  defaultHeaders: {
+    'Authorization': 'Bearer token'
+  },
+  responseDataPath: 'data',  // API response data path
+  components: {
+    MyButton,
+  }
+}));
+
+app.mount('#app');
 ```
 
 ## TypeScript Support

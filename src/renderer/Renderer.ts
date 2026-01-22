@@ -198,7 +198,9 @@ export class Renderer {
         // 设置生命周期钩子（包括 initApi 和 uiApi 处理）
         renderer.setupLifecycleHooks(node, actionContext, stateManager, componentEventHandler, $loading, $uiLoading, dynamicChildren);
 
-        return () => renderer.renderNode(node, runtimeContext, actionContext, dynamicChildren);
+        return () => {
+          return renderer.renderNode(node, runtimeContext, actionContext, dynamicChildren);
+        };
       },
     });
   }

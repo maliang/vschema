@@ -81,12 +81,12 @@ interface JsonNode {
   onMounted?: Action | Action[];
   onUnmounted?: Action | Action[];
   onUpdated?: Action | Action[];
-  watch?: Record<string, WatchConfig>;
+  watch?: Record<string, WatchConfig | Action>;
   
   initApi?: string | ApiConfig;
   uiApi?: string | ApiConfig;
   
-  slots?: Record<string, SlotConfig>;
+  slots?: Record<string, JsonNode[] | SlotConfig>;
 }
 
 interface WatchConfig {
@@ -97,10 +97,12 @@ interface WatchConfig {
 
 interface ApiConfig {
   url: string;
-  method?: string;
+  method?: 'GET' | 'POST' | 'PUT' | 'DELETE' | 'PATCH';
   headers?: Record<string, string>;
-  params?: Record<string, any>;
   body?: any;
+  then?: Action | Action[];
+  catch?: Action | Action[];
+  ignoreBaseURL?: boolean;
 }
 
 interface SlotConfig {

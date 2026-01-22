@@ -158,7 +158,36 @@ Define reusable actions:
       "com": "button",
       "events": { "click": { "call": "increment" } },
       "children": "Increment"
+    },
+    {
+      "com": "button",
+      "events": { "click": { "call": "reset" } },
+      "children": "Reset"
     }
   ]
 }
 ```
+
+## Scope
+
+VSchema uses scope chain for data access:
+
+1. **Current Node Scope** - Loop variables, slot variables
+2. **Parent Node Scope** - Look up the tree
+3. **Root Node Scope** - Global data and computed
+
+```json
+{
+  "data": { "items": [{ "name": "A" }, { "name": "B" }] },
+  "com": "ul",
+  "children": [
+    {
+      "for": "item in items",
+      "com": "li",
+      "children": "{{ item.name }}"
+    }
+  ]
+}
+```
+
+In the loop, `item` is the current scope variable, `items` comes from parent scope.

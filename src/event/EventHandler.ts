@@ -164,19 +164,17 @@ export class EventHandler implements IEventHandler {
    */
   createHandler(action: Action | Action[], context: ActionContext): Function {
     return async (event?: Event) => {
-      // 创建包含事件对象的上下文
-      const eventContext: ActionContext = {
-        ...context,
-        state: {
-          ...context.state,
-          $event: event,
-        },
-      };
+      // 将 $event 直接添加到原始 state 中，保持响应式
+      // 注意：不能使用展开运算符创建新对象，否则会丢失响应式
+      context.state.$event = event;
 
       await this.executeActions(
         Array.isArray(action) ? action : [action],
-        eventContext
+        context
       );
+
+      // 清理 $event
+      delete context.state.$event;
     };
   }
 
@@ -227,19 +225,17 @@ export class EventHandler implements IEventHandler {
         }
       }
 
-      // 创建包含事件对象的上下文
-      const eventContext: ActionContext = {
-        ...context,
-        state: {
-          ...context.state,
-          $event: event,
-        },
-      };
+      // 将 $event 直接添加到原始 state 中，保持响应式
+      // 注意：不能使用展开运算符创建新对象，否则会丢失响应式
+      context.state.$event = event;
 
       await this.executeActions(
         Array.isArray(action) ? action : [action],
-        eventContext
+        context
       );
+
+      // 清理 $event
+      delete context.state.$event;
     };
   }
 
@@ -875,6 +871,7 @@ export class EventHandler implements IEventHandler {
       // 创建异步函数并执行
       // 使用 AsyncFunction 构造器来支持 await
       const AsyncFunction = Object.getPrototypeOf(async function(){}).constructor;
+      
       const fn = new AsyncFunction(...paramNames, script);
       
       await fn(...paramValues);

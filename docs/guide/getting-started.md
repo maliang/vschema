@@ -86,6 +86,10 @@ VSchema 提供多种动作类型处理用户交互：
 | `call` | 调用方法 |
 | `emit` | 触发事件 |
 | `fetch` | API 调用 |
+| `ws` | WebSocket 操作 |
+| `if` | 条件执行 |
+| `script` | 自定义脚本 |
+| `copy` | 复制到剪贴板 |
 
 ## 下一步
 

@@ -74,10 +74,25 @@ VSchema 提供多种方式与后端 API 交互。
     "url": "/api/data",
     "method": "GET",
     "headers": { "Authorization": "Bearer {{ token }}" },
-    "params": { "page": 1, "size": 10 }
+    "body": { "page": 1, "size": 10 },
+    "then": { "set": "message", "value": "数据加载成功" },
+    "catch": { "set": "error", "value": "{{ $error.message }}" },
+    "ignoreBaseURL": false
   }
 }
 ```
+
+### 配置项
+
+| 属性 | 类型 | 说明 |
+|------|------|------|
+| `url` | `string` | 请求 URL，支持表达式 |
+| `method` | `string` | 请求方法：GET, POST, PUT, DELETE, PATCH |
+| `headers` | `object` | 请求头 |
+| `body` | `any` | 请求体 |
+| `then` | `Action` | 成功回调，可访问 `$response` |
+| `catch` | `Action` | 失败回调，可访问 `$error` |
+| `ignoreBaseURL` | `boolean` | 是否忽略全局 baseURL |
 
 ### 响应数据映射
 
@@ -102,6 +117,21 @@ app.use(createVSchemaPlugin({
 ```
 
 后端返回的 JSON 会被解析为 VSchema 节点并渲染。
+
+### 完整配置
+
+```json
+{
+  "uiApi": {
+    "url": "/api/pages/{{ pageId }}",
+    "method": "GET",
+    "headers": { "Authorization": "Bearer {{ token }}" },
+    "then": { "set": "pageLoaded", "value": true },
+    "catch": { "set": "loadError", "value": "{{ $error.message }}" },
+    "ignoreBaseURL": false
+  }
+}
+```
 
 ### 动态页面示例
 
