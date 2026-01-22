@@ -240,7 +240,47 @@ export class StateManager implements IStateManager {
     } else if ('call' in action) {
       // CallAction
       const callAction = action as { call: string; args?: any[] };
-      const method = context.methods[callAction.call];
+      
+      // 支持嵌套路径查找，如 "$methods.$nav.push"
+      let method: Function | undefined;
+      const callPath = callAction.call;
+      
+      if (callPath.includes('.')) {
+        // 嵌套路径：先尝试从 context.methods 查找，再从 state 查找
+        const parts = callPath.split('.');
+        let target: any = context.methods;
+        
+        // 先在 methods 中查找
+        for (const part of parts) {
+          if (target && typeof target === 'object' && part in target) {
+            target = target[part];
+          } else {
+            target = undefined;
+            break;
+          }
+        }
+        
+        // 如果 methods 中没找到，尝试从 state 中查找（支持 $methods.xxx）
+        if (target === undefined) {
+          target = context.state;
+          for (const part of parts) {
+            if (target && typeof target === 'object' && part in target) {
+              target = target[part];
+            } else {
+              target = undefined;
+              break;
+            }
+          }
+        }
+        
+        if (typeof target === 'function') {
+          method = target;
+        }
+      } else {
+        // 简单路径：直接从 methods 查找
+        method = context.methods[callPath];
+      }
+      
       if (method) {
         await method(...(callAction.args || []));
       } else {
