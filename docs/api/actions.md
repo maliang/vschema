@@ -22,7 +22,7 @@ interface SetAction {
 
 ```typescript
 interface CallAction {
-  call: string;     // 方法名
+  call: string;     // 方法名（支持嵌套路径）
   args?: any[];     // 参数列表
 }
 ```
@@ -32,6 +32,17 @@ interface CallAction {
 { "call": "handleSubmit" }
 { "call": "updateItem", "args": ["{{ item.id }}", "{{ newValue }}"] }
 ```
+
+支持嵌套路径调用外部注入的方法：
+```json
+{ "call": "$methods.$nav.push", "args": ["/user/profile"] }
+{ "call": "$methods.$tab.close" }
+{ "call": "$methods.$window.open", "args": ["https://example.com"] }
+```
+
+方法查找顺序：
+1. 首先在 `methods`（schema 中定义的方法）中查找
+2. 如果未找到，在 `state`（包括外部注入的 `$methods`）中查找
 
 ## emit - 触发事件
 

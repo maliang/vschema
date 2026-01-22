@@ -12,10 +12,29 @@ All action types supported by VSchema.
 
 ## call - Call Method
 
+```typescript
+interface CallAction {
+  call: string;     // Method name (supports nested paths)
+  args?: any[];     // Arguments list
+}
+```
+
+Examples:
 ```json
 { "call": "handleSubmit" }
 { "call": "updateItem", "args": ["{{ item.id }}", "{{ newValue }}"] }
 ```
+
+Supports nested path to call externally injected methods:
+```json
+{ "call": "$methods.$nav.push", "args": ["/user/profile"] }
+{ "call": "$methods.$tab.close" }
+{ "call": "$methods.$window.open", "args": ["https://example.com"] }
+```
+
+Method lookup order:
+1. First looks in `methods` (methods defined in schema)
+2. If not found, looks in `state` (including externally injected `$methods`)
 
 ## emit - Emit Event
 
