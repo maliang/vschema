@@ -186,3 +186,58 @@ export function hasPath(obj: any, path: string): boolean {
 
   return true;
 }
+
+
+/**
+ * 通过路径查找方法
+ * 支持嵌套路径，如 "$methods.$nav.push"
+ * 
+ * @param path 方法路径
+ * @param sources 查找源列表，按顺序查找
+ * @returns 找到的方法，未找到返回 undefined
+ * 
+ * @example
+ * const methods = { handleSubmit: () => {} };
+ * const state = { $methods: { $nav: { push: (path) => {} } } };
+ * 
+ * resolveMethod('handleSubmit', [methods]) // () => {}
+ * resolveMethod('$methods.$nav.push', [methods, state]) // (path) => {}
+ */
+export function resolveMethod(
+  path: string,
+  sources: Record<string, any>[]
+): Function | undefined {
+  if (!path) return undefined;
+
+  // 简单路径：直接从第一个源查找
+  if (!path.includes('.')) {
+    for (const source of sources) {
+      if (source && typeof source[path] === 'function') {
+        return source[path];
+      }
+    }
+    return undefined;
+  }
+
+  // 嵌套路径：按点号分割，逐层查找
+  const parts = path.split('.');
+  
+  for (const source of sources) {
+    let target: any = source;
+    
+    for (const part of parts) {
+      if (target && typeof target === 'object' && part in target) {
+        target = target[part];
+      } else {
+        target = undefined;
+        break;
+      }
+    }
+    
+    if (typeof target === 'function') {
+      return target;
+    }
+  }
+  
+  return undefined;
+}

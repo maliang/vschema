@@ -30,6 +30,7 @@ import {
   isCopyAction,
 } from '../types/schema';
 import type { EventModifiers } from '../types/runtime';
+import { resolveMethod } from '../utils/path';
 
 /**
  * 键盘按键映射
@@ -641,7 +642,8 @@ export class EventHandler implements IEventHandler {
    * 执行 CallAction - 调用方法
    */
   private async executeCallAction(action: CallAction, context: ActionContext): Promise<void> {
-    const method = context.methods[action.call];
+    // 使用工具函数查找方法（支持嵌套路径，如 "$methods.$nav.push"）
+    const method = resolveMethod(action.call, [context.methods, context.state]);
     
     if (!method) {
       console.warn(`未找到方法（Method）"${action.call}"`);

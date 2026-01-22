@@ -11,7 +11,7 @@ import type {
 } from '../types/runtime';
 import type { Action, WatchConfig } from '../types/schema';
 import { ExpressionEvaluator } from '../expression/ExpressionEvaluator';
-import { getByPath, setByPath } from '../utils/path';
+import { getByPath, setByPath, resolveMethod } from '../utils/path';
 
 export class StateManager implements IStateManager {
   private state: Reactive<any> = reactive({});
@@ -241,45 +241,8 @@ export class StateManager implements IStateManager {
       // CallAction
       const callAction = action as { call: string; args?: any[] };
       
-      // 支持嵌套路径查找，如 "$methods.$nav.push"
-      let method: Function | undefined;
-      const callPath = callAction.call;
-      
-      if (callPath.includes('.')) {
-        // 嵌套路径：先尝试从 context.methods 查找，再从 state 查找
-        const parts = callPath.split('.');
-        let target: any = context.methods;
-        
-        // 先在 methods 中查找
-        for (const part of parts) {
-          if (target && typeof target === 'object' && part in target) {
-            target = target[part];
-          } else {
-            target = undefined;
-            break;
-          }
-        }
-        
-        // 如果 methods 中没找到，尝试从 state 中查找（支持 $methods.xxx）
-        if (target === undefined) {
-          target = context.state;
-          for (const part of parts) {
-            if (target && typeof target === 'object' && part in target) {
-              target = target[part];
-            } else {
-              target = undefined;
-              break;
-            }
-          }
-        }
-        
-        if (typeof target === 'function') {
-          method = target;
-        }
-      } else {
-        // 简单路径：直接从 methods 查找
-        method = context.methods[callPath];
-      }
+      // 使用工具函数查找方法（支持嵌套路径，如 "$methods.$nav.push"）
+      const method = resolveMethod(callAction.call, [context.methods, context.state]);
       
       if (method) {
         await method(...(callAction.args || []));
