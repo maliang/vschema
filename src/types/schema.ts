@@ -255,27 +255,27 @@ export interface JsonNode {
  * Type guards for action types
  */
 export function isSetAction(action: Action): action is SetAction {
-  return 'set' in action;
+  return typeof action === 'object' && action !== null && 'set' in action;
 }
 
 export function isCallAction(action: Action): action is CallAction {
-  return 'call' in action;
+  return typeof action === 'object' && action !== null && 'call' in action;
 }
 
 export function isEmitAction(action: Action): action is EmitAction {
-  return 'emit' in action;
+  return typeof action === 'object' && action !== null && 'emit' in action;
 }
 
 export function isFetchAction(action: Action): action is FetchAction {
-  return 'fetch' in action;
+  return typeof action === 'object' && action !== null && 'fetch' in action;
 }
 
 export function isWebSocketAction(action: Action): action is WebSocketAction {
-  return 'ws' in action;
+  return typeof action === 'object' && action !== null && 'ws' in action;
 }
 
 export function isIfAction(action: Action): action is IfAction {
-  return 'if' in action && 'then' in action;
+  return typeof action === 'object' && action !== null && 'if' in action && 'then' in action;
 }
 
 export function isScriptAction(action: Action): action is ScriptAction {
