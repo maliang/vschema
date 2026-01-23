@@ -11,6 +11,10 @@ on:
 jobs:
   build-and-release:
     runs-on: ubuntu-latest # 运行环境
+    permissions:
+      # 必须添加以下权限，Trusted Publisher 需要 GitHub 身份验证
+      id-token: write # 用于向 npm 证明身份（核心权限）
+      contents: write # 用于创建 GitHub Release
     steps:
       # 步骤1：拉取代码到运行环境
       - name: Checkout code
@@ -24,17 +28,19 @@ jobs:
         with:
           node-version: 24 # 根据你的项目需求选择Node版本
           registry-url: https://registry.npmjs.org/ # 指定npm仓库地址
+          # 关键：启用 provenance 所需的身份验证
+          cache: 'pnpm' # 缓存pnpm依赖，加速构建
 
-      # 步骤3：安装pnpm（改用官方Action，核心修改）
+      # 步骤3：安装pnpm（自动读取package.json版本）
       - name: Install pnpm
         uses: pnpm/action-setup@v4
         with:
-          package_json_file: ./package.json # 指定pnpm版本（推荐使用项目实际依赖的版本）
-          run_install: false # 暂时不自动安装依赖，后续手动执行
+          package_json_file: ./package.json # 自动解析pnpm版本
+          run_install: false # 手动安装依赖
 
       # 步骤4：安装项目依赖
       - name: Install dependencies
-        run: pnpm install --frozen-lockfile # 使用frozen-lockfile保证依赖版本一致
+        run: pnpm install --frozen-lockfile # 锁定依赖版本
 
       # 步骤5：自动生成发布说明
       - name: Generate release notes
@@ -54,19 +60,24 @@ jobs:
       - name: Create GitHub Release
         uses: softprops/action-gh-release@v2
         with:
-          # 发布标题（使用标签名）
           name: Release ${{ env.TAG_NAME }}
-          # 发布说明（使用上面生成的提交记录）
           body: ${{ env.RELEASE_NOTES }}
-          # 是否标记为预发布（可选，如beta版本可设为true）
           prerelease: false
         env:
-          # 自动使用GitHub Actions的默认令牌授权
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
-      # 步骤7：发布到npm
+      # 步骤7：发布到npm（修复身份验证问题）
       - name: Publish to npm
-        run: pnpm publish --provenance --no-git-checks # --no-git-checks跳过Git校验
+        run: |
+          # 显式指定registry，避免配置问题
+          pnpm publish --provenance --no-git-checks --registry=https://registry.npmjs.org/
         env:
-          # Trusted Publisher 模式下无需手动设置 NPM_TOKEN
-          NODE_AUTH_TOKEN: ${{ secrets.NODE_AUTH_TOKEN }}
+          # Trusted Publisher 不需要手动设置 NODE_AUTH_TOKEN，删除即可
+          # 关键：确保没有手动注入 token，让 id-token 生效
+          NODE_AUTH_TOKEN: ""
+
+      # 备选方案：如果pnpm publish仍失败，改用npm publish（确保provenance和权限）
+      # - name: Publish to npm (fallback)
+      #   run: npm publish --provenance --no-git-checks
+      #   env:
+      #     NODE_AUTH_TOKEN: ""
