@@ -279,11 +279,11 @@ export function isIfAction(action: Action): action is IfAction {
 }
 
 export function isScriptAction(action: Action): action is ScriptAction {
-  return 'script' in action;
+  return typeof action === 'object' && action !== null && 'script' in action;
 }
 
 export function isCopyAction(action: Action): action is CopyAction {
-  return 'copy' in action;
+  return typeof action === 'object' && action !== null && 'copy' in action;
 }
 
 /**
