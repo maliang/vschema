@@ -5,15 +5,15 @@
 ::: code-group
 
 ```bash [pnpm]
-pnpm add @maliang47/vschema
+pnpm add vschema-ui
 ```
 
 ```bash [npm]
-npm install @maliang47/vschema
+npm install vschema-ui
 ```
 
 ```bash [yarn]
-yarn add @maliang47/vschema
+yarn add vschema-ui
 ```
 
 :::
@@ -29,7 +29,7 @@ Suitable when VSchema is needed throughout the application:
 ```typescript
 // main.ts
 import { createApp } from 'vue';
-import { VSchemaPlugin } from '@maliang47/vschema';
+import { VSchemaPlugin } from 'vschema-ui';
 import App from './App.vue';
 
 const app = createApp(App);
@@ -55,8 +55,8 @@ Suitable when only used in some pages, reduces bundle size:
 </template>
 
 <script setup lang="ts">
-import { VSchema } from '@maliang47/vschema';
-import type { JsonNode } from '@maliang47/vschema';
+import { VSchema } from 'vschema-ui';
+import type { JsonNode } from 'vschema-ui';
 
 const schema: JsonNode = {
   com: 'div',
@@ -71,7 +71,7 @@ Suitable when you need to pre-configure API URL or register custom components:
 
 ```typescript
 // components/ConfiguredVSchema.ts
-import { createVSchema } from '@maliang47/vschema';
+import { createVSchema } from 'vschema-ui';
 import MyButton from './MyButton.vue';
 import MyCard from './MyCard.vue';
 
@@ -107,7 +107,7 @@ If you need global registration with configuration:
 ```typescript
 // main.ts
 import { createApp } from 'vue';
-import { createVSchemaPlugin } from '@maliang47/vschema';
+import { createVSchemaPlugin } from 'vschema-ui';
 import MyButton from './components/MyButton.vue';
 
 const app = createApp(App);
@@ -131,7 +131,7 @@ app.mount('#app');
 VSchema is fully written in TypeScript with complete type definitions:
 
 ```typescript
-import type { JsonNode, GlobalConfig, Action } from '@maliang47/vschema';
+import type { JsonNode, GlobalConfig, Action } from 'vschema-ui';
 
 const schema: JsonNode = {
   com: 'div',

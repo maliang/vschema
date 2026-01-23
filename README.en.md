@@ -28,11 +28,11 @@ English | [简体中文](./README.md)
 ## 📦 Installation
 
 ```bash
-pnpm add @maliang47/vschema
+pnpm add vschema-ui
 # or
-npm install @maliang47/vschema
+npm install vschema-ui
 # or
-yarn add @maliang47/vschema
+yarn add vschema-ui
 ```
 
 ## 🚀 Quick Start
@@ -41,7 +41,7 @@ yarn add @maliang47/vschema
 
 ```typescript
 import { createApp } from 'vue';
-import { VSchemaPlugin } from '@maliang47/vschema';
+import { VSchemaPlugin } from 'vschema-ui';
 import App from './App.vue';
 
 const app = createApp(App);
@@ -57,7 +57,7 @@ app.mount('#app');
 </template>
 
 <script setup lang="ts">
-import type { JsonNode } from '@maliang47/vschema';
+import type { JsonNode } from 'vschema-ui';
 
 const schema: JsonNode = {
   data: { count: 0 },
@@ -86,7 +86,7 @@ const schema: JsonNode = {
 </template>
 
 <script setup lang="ts">
-import type { JsonNode } from '@maliang47/vschema';
+import type { JsonNode } from 'vschema-ui';
 
 const schema: JsonNode = {
   data: { form: { username: '', password: '' } },
@@ -320,7 +320,7 @@ Use `{{ expression }}` syntax to embed expressions in strings:
 ## 🧩 Register Custom Components
 
 ```typescript
-import { useComponentRegistry } from '@maliang47/vschema';
+import { useComponentRegistry } from 'vschema-ui';
 import MyButton from './MyButton.vue';
 
 const registry = useComponentRegistry();
@@ -331,7 +331,7 @@ registry.register('MyButton', MyButton);
 
 ```typescript
 import { createApp } from 'vue';
-import { createVSchemaPlugin } from '@maliang47/vschema';
+import { createVSchemaPlugin } from 'vschema-ui';
 
 const app = createApp(App);
 

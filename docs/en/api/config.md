@@ -5,7 +5,7 @@ VSchema plugin global configuration options.
 ## Configuration
 
 ```typescript
-import { createVSchemaPlugin } from '@maliang47/vschema';
+import { createVSchemaPlugin } from 'vschema-ui';
 
 app.use(createVSchemaPlugin({
   baseURL: 'https://api.example.com',
