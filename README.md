@@ -1,4 +1,4 @@
-# VSchema
+# VSchema-UI
 
 [![npm version](https://img.shields.io/npm/v/vschema-ui.svg)](https://www.npmjs.com/package/vschema-ui)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
