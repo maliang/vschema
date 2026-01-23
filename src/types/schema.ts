@@ -209,8 +209,20 @@ export interface JsonNode {
   for?: string;
   /** Key for loop items */
   key?: string;
-  /** Two-way binding (v-model) */
-  model?: string;
+  /**
+   * 双向绑定 (v-model)
+   * 
+   * 支持两种格式：
+   * 1. 字符串：简单 v-model，如 "username" 或 "username.trim.lazy"
+   * 2. 对象：带参数的 v-model:xxx，键为参数名（modelValue 表示默认 v-model）
+   *    如 { "modelValue": "data.trim", "columns": "tableColumns" }
+   * 
+   * 支持的修饰符（追加在路径后）：
+   * - .trim: 自动去除首尾空格
+   * - .number: 自动转换为数字
+   * - .lazy: 使用 change 事件而非 input 事件
+   */
+  model?: string | Record<string, string>;
   /** Template ref */
   ref?: string;
 

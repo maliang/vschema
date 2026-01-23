@@ -670,13 +670,31 @@ export class Renderer {
     // 处理事件
     const eventHandlers = this.resolveEvents(node.events, actionContext);
 
-    // 处理 v-model
+    // 处理 v-model（支持字符串或对象格式）
     if (node.model) {
-      // 获取 input type 用于特殊处理 checkbox
       const inputType = node.props?.type;
-      const modelHandlers = this.resolveModel(node.model, runtimeContext, evalContext, inputType);
-      Object.assign(props, modelHandlers.props);
-      Object.assign(eventHandlers, modelHandlers.events);
+      
+      if (typeof node.model === 'string') {
+        // 字符串格式：简单 v-model
+        const modelHandlers = this.resolveModel(node.model, runtimeContext, evalContext, inputType);
+        Object.assign(props, modelHandlers.props);
+        Object.assign(eventHandlers, modelHandlers.events);
+      } else {
+        // 对象格式：带参数的 v-model:xxx
+        for (const [arg, path] of Object.entries(node.model)) {
+          if (arg === 'modelValue') {
+            // modelValue 作为默认 v-model 处理
+            const modelHandlers = this.resolveModel(path, runtimeContext, evalContext, inputType);
+            Object.assign(props, modelHandlers.props);
+            Object.assign(eventHandlers, modelHandlers.events);
+          } else {
+            // 其他参数作为 v-model:xxx 处理
+            const modelHandlers = this.resolveModelWithArg(arg, path, runtimeContext, evalContext);
+            Object.assign(props, modelHandlers.props);
+            Object.assign(eventHandlers, modelHandlers.events);
+          }
+        }
+      }
     }
 
     // 合并 props 和事件处理器
@@ -799,14 +817,25 @@ export class Renderer {
   }
 
   /**
-   * 解析 v-model 双向绑定
+   * 解析 v-model 双向绑定（支持修饰符）
+   * 
+   * 支持的修饰符：
+   * - .trim: 自动去除首尾空格
+   * - .number: 自动转换为数字
+   * - .lazy: 使用 change 事件而非 input 事件
+   * 
+   * 格式：path 或 path.modifier1.modifier2
+   * 例如：username.trim 或 age.number 或 content.trim.lazy
    */
   private resolveModel(
-    modelPath: string,
+    modelExpression: string,
     runtimeContext: RuntimeContext,
     evalContext: EvaluationContext,
     inputType?: string
   ): { props: Record<string, any>; events: Record<string, Function> } {
+    // 解析修饰符
+    const { path: modelPath, modifiers } = this.parseModelModifiers(modelExpression);
+    
     // 获取当前值
     const currentValue = this.evaluator.evaluate(modelPath, evalContext);
     const value = currentValue.success ? currentValue.value : '';
@@ -826,22 +855,128 @@ export class Renderer {
       };
     }
 
+    // 值转换函数
+    const transformValue = (val: any): any => {
+      let result = val;
+      if (modifiers.trim && typeof result === 'string') {
+        result = result.trim();
+      }
+      if (modifiers.number) {
+        const num = parseFloat(result);
+        result = isNaN(num) ? result : num;
+      }
+      return result;
+    };
+
+    // 根据 lazy 修饰符决定使用哪个事件
+    const events: Record<string, Function> = {};
+    
+    if (modifiers.lazy) {
+      // lazy 模式：使用 change 事件
+      events.onChange = (event: Event | any) => {
+        const newValue = event?.target?.value ?? event;
+        this.setStateByPath(runtimeContext.state, modelPath, transformValue(newValue));
+      };
+    } else {
+      // 默认模式：使用 input 事件
+      events.onInput = (event: Event | any) => {
+        const newValue = event?.target?.value ?? event;
+        this.setStateByPath(runtimeContext.state, modelPath, transformValue(newValue));
+      };
+    }
+
+    // 兼容 Vue 组件的 update 事件
+    events['onUpdate:modelValue'] = (newValue: any) => {
+      this.setStateByPath(runtimeContext.state, modelPath, transformValue(newValue));
+    };
+    events['onUpdate:value'] = (newValue: any) => {
+      this.setStateByPath(runtimeContext.state, modelPath, transformValue(newValue));
+    };
+
     return {
       props: {
         value: value,
         modelValue: value,
       },
+      events,
+    };
+  }
+
+  /**
+   * 解析 model 表达式中的修饰符
+   * @param expression 表达式，如 "username.trim.lazy"
+   * @returns 路径和修饰符对象
+   */
+  private parseModelModifiers(expression: string): {
+    path: string;
+    modifiers: { trim?: boolean; number?: boolean; lazy?: boolean };
+  } {
+    const knownModifiers = ['trim', 'number', 'lazy'];
+    const parts = expression.split('.');
+    
+    // 从后往前找修饰符
+    const modifiers: { trim?: boolean; number?: boolean; lazy?: boolean } = {};
+    let pathParts = [...parts];
+    
+    while (pathParts.length > 1) {
+      const last = pathParts[pathParts.length - 1];
+      if (knownModifiers.includes(last)) {
+        (modifiers as any)[last] = true;
+        pathParts.pop();
+      } else {
+        break;
+      }
+    }
+    
+    return {
+      path: pathParts.join('.'),
+      modifiers,
+    };
+  }
+
+  /**
+   * 解析带参数的 v-model:xxx 双向绑定（支持修饰符）
+   * @param arg 参数名，如 columns、visible
+   * @param modelExpression 绑定表达式，支持修饰符如 "path.trim"
+   * @param runtimeContext 运行时上下文
+   * @param evalContext 求值上下文
+   */
+  private resolveModelWithArg(
+    arg: string,
+    modelExpression: string,
+    runtimeContext: RuntimeContext,
+    evalContext: EvaluationContext
+  ): { props: Record<string, any>; events: Record<string, Function> } {
+    // 解析修饰符
+    const { path: modelPath, modifiers } = this.parseModelModifiers(modelExpression);
+    
+    // 获取当前值
+    const currentValue = this.evaluator.evaluate(modelPath, evalContext);
+    const value = currentValue.success ? currentValue.value : undefined;
+
+    // 值转换函数
+    const transformValue = (val: any): any => {
+      let result = val;
+      if (modifiers.trim && typeof result === 'string') {
+        result = result.trim();
+      }
+      if (modifiers.number) {
+        const num = parseFloat(result);
+        result = isNaN(num) ? result : num;
+      }
+      return result;
+    };
+
+    // 构建事件名：update:xxx -> onUpdate:xxx
+    const eventName = `onUpdate:${arg}`;
+
+    return {
+      props: {
+        [arg]: value,
+      },
       events: {
-        onInput: (event: Event | any) => {
-          const newValue = event?.target?.value ?? event;
-          this.setStateByPath(runtimeContext.state, modelPath, newValue);
-        },
-        'onUpdate:modelValue': (newValue: any) => {
-          this.setStateByPath(runtimeContext.state, modelPath, newValue);
-        },
-        // 兼容 Naive UI 等使用 value 而非 modelValue 的组件
-        'onUpdate:value': (newValue: any) => {
-          this.setStateByPath(runtimeContext.state, modelPath, newValue);
+        [eventName]: (newValue: any) => {
+          this.setStateByPath(runtimeContext.state, modelPath, transformValue(newValue));
         },
       },
     };

@@ -41,6 +41,123 @@ VSchema 支持 `model` 属性实现双向数据绑定，类似 Vue 的 `v-model`
 }
 ```
 
+## 修饰符
+
+VSchema 支持三种修饰符，可以追加在绑定路径后面：
+
+| 修饰符 | 说明 | 示例 |
+|--------|------|------|
+| `.trim` | 自动去除首尾空格 | `"username.trim"` |
+| `.number` | 自动转换为数字 | `"age.number"` |
+| `.lazy` | 使用 change 事件而非 input 事件 | `"content.lazy"` |
+
+### 单个修饰符
+
+```json
+{
+  "data": { "username": "", "age": 0 },
+  "com": "div",
+  "children": [
+    {
+      "com": "input",
+      "model": "username.trim",
+      "props": { "placeholder": "用户名（自动去除空格）" }
+    },
+    {
+      "com": "input",
+      "model": "age.number",
+      "props": { "type": "number", "placeholder": "年龄" }
+    }
+  ]
+}
+```
+
+### 组合修饰符
+
+修饰符可以组合使用：
+
+```json
+{
+  "com": "input",
+  "model": "price.trim.number",
+  "props": { "placeholder": "价格" }
+}
+```
+
+```json
+{
+  "com": "textarea",
+  "model": "content.trim.lazy",
+  "props": { "placeholder": "内容（失焦时更新）" }
+}
+```
+
+## 带参数的 v-model
+
+对于支持多个 v-model 的组件（如 `v-model:visible`、`v-model:columns`），使用对象格式：
+
+### 基础用法
+
+```json
+{
+  "data": { "showModal": false },
+  "com": "NModal",
+  "model": {
+    "show": "showModal"
+  },
+  "children": [...]
+}
+```
+
+### 多个 v-model
+
+```json
+{
+  "data": {
+    "tableColumns": [...],
+    "selectedKeys": []
+  },
+  "com": "TableColumnSetting",
+  "model": {
+    "columns": "tableColumns",
+    "checkedKeys": "selectedKeys"
+  }
+}
+```
+
+### modelValue 作为默认 v-model
+
+在对象格式中，`modelValue` 表示默认的 `v-model`：
+
+```json
+{
+  "data": { "inputValue": "", "visible": true },
+  "com": "MyComponent",
+  "model": {
+    "modelValue": "inputValue",
+    "visible": "visible"
+  }
+}
+```
+
+等价于 Vue 模板中的：
+```vue
+<MyComponent v-model="inputValue" v-model:visible="visible" />
+```
+
+### 带修饰符
+
+对象格式同样支持修饰符：
+
+```json
+{
+  "com": "NInput",
+  "model": {
+    "value": "username.trim"
+  }
+}
+```
+
 ## 不同输入类型
 
 ### 文本域

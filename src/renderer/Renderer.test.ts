@@ -441,6 +441,228 @@ describe('Renderer - Unit Tests', () => {
 
       expect(wrapper.find('span').text()).toBe('new value');
     });
+
+    // === 修饰符测试 ===
+    describe('modifiers', () => {
+      it('should trim value with .trim modifier', async () => {
+        const node: JsonNode = {
+          data: { text: '' },
+          com: 'div',
+          children: [
+            { com: 'input', model: 'text.trim' },
+            { com: 'span', children: '[{{ text }}]' },
+          ],
+        };
+        const wrapper = await mountRenderer(node);
+
+        const input = wrapper.find('input');
+        await input.setValue('  hello world  ');
+        await nextTick();
+
+        expect(wrapper.find('span').text()).toBe('[hello world]');
+      });
+
+      it('should convert to number with .number modifier', async () => {
+        const node: JsonNode = {
+          data: { count: 0 },
+          com: 'div',
+          children: [
+            { com: 'input', model: 'count.number' },
+            { com: 'span', children: '{{ typeof count }}: {{ count }}' },
+          ],
+        };
+        const wrapper = await mountRenderer(node);
+
+        const input = wrapper.find('input');
+        await input.setValue('42');
+        await nextTick();
+
+        expect(wrapper.find('span').text()).toBe('number: 42');
+      });
+
+      it('should use change event with .lazy modifier', async () => {
+        const node: JsonNode = {
+          data: { text: '' },
+          com: 'div',
+          children: [
+            { com: 'input', model: 'text.lazy' },
+            { com: 'span', children: '{{ text }}' },
+          ],
+        };
+        const wrapper = await mountRenderer(node);
+
+        const input = wrapper.find('input');
+        // 设置值但不触发 change
+        input.element.value = 'typing...';
+        await input.trigger('input');
+        await nextTick();
+        
+        // lazy 模式下 input 事件不应更新
+        expect(wrapper.find('span').text()).toBe('');
+
+        // 触发 change 事件
+        await input.trigger('change');
+        await nextTick();
+
+        expect(wrapper.find('span').text()).toBe('typing...');
+      });
+
+      it('should combine multiple modifiers', async () => {
+        const node: JsonNode = {
+          data: { value: '' },
+          com: 'div',
+          children: [
+            { com: 'input', model: 'value.trim.number' },
+            { com: 'span', children: '{{ typeof value }}: {{ value }}' },
+          ],
+        };
+        const wrapper = await mountRenderer(node);
+
+        const input = wrapper.find('input');
+        await input.setValue('  123  ');
+        await nextTick();
+
+        expect(wrapper.find('span').text()).toBe('number: 123');
+      });
+    });
+
+    // === 带参数的 v-model:xxx 测试 ===
+    describe('v-model with argument (object format)', () => {
+      /**
+       * 创建支持 v-model:xxx 的测试组件
+       */
+      function createModelArgComponent() {
+        return defineComponent({
+          name: 'ModelArgTest',
+          props: {
+            columns: {
+              type: Array,
+              default: () => [],
+            },
+            visible: {
+              type: Boolean,
+              default: false,
+            },
+          },
+          emits: ['update:columns', 'update:visible'],
+          setup(props, { emit }) {
+            return () => h('div', { class: 'model-arg-test' }, [
+              h('span', { class: 'columns-count' }, `Columns: ${props.columns.length}`),
+              h('span', { class: 'visible-state' }, `Visible: ${props.visible}`),
+              h('button', {
+                class: 'toggle-visible',
+                onClick: () => emit('update:visible', !props.visible),
+              }, 'Toggle'),
+              h('button', {
+                class: 'add-column',
+                onClick: () => emit('update:columns', [...props.columns, { id: Date.now() }]),
+              }, 'Add Column'),
+            ]);
+          },
+        });
+      }
+
+      it('should bind with object format model', async () => {
+        const ModelArgTest = createModelArgComponent();
+        registry.register('ModelArgTest', ModelArgTest);
+
+        const node: JsonNode = {
+          data: {
+            tableColumns: [{ id: 1 }, { id: 2 }],
+            showModal: false,
+          },
+          com: 'ModelArgTest',
+          model: {
+            columns: 'tableColumns',
+            visible: 'showModal',
+          },
+        };
+        const wrapper = await mountRenderer(node);
+
+        expect(wrapper.find('.columns-count').text()).toBe('Columns: 2');
+        expect(wrapper.find('.visible-state').text()).toBe('Visible: false');
+      });
+
+      it('should update state when component emits update:xxx', async () => {
+        const ModelArgTest = createModelArgComponent();
+        registry.register('ModelArgTest', ModelArgTest);
+
+        const node: JsonNode = {
+          data: {
+            tableColumns: [],
+            showModal: false,
+          },
+          com: 'div',
+          children: [
+            {
+              com: 'ModelArgTest',
+              model: {
+                columns: 'tableColumns',
+                visible: 'showModal',
+              },
+            },
+            { com: 'span', props: { class: 'state-display' }, children: 'Cols: {{ tableColumns.length }}, Show: {{ showModal }}' },
+          ],
+        };
+        const wrapper = await mountRenderer(node);
+
+        expect(wrapper.find('.state-display').text()).toBe('Cols: 0, Show: false');
+
+        // 点击 toggle 按钮
+        await wrapper.find('.toggle-visible').trigger('click');
+        await nextTick();
+
+        expect(wrapper.find('.state-display').text()).toBe('Cols: 0, Show: true');
+
+        // 点击 add column 按钮
+        await wrapper.find('.add-column').trigger('click');
+        await nextTick();
+
+        expect(wrapper.find('.state-display').text()).toBe('Cols: 1, Show: true');
+      });
+
+      it('should support modelValue as default v-model', async () => {
+        const node: JsonNode = {
+          data: { text: 'hello' },
+          com: 'div',
+          children: [
+            {
+              com: 'input',
+              model: { modelValue: 'text' },
+            },
+            { com: 'span', children: '{{ text }}' },
+          ],
+        };
+        const wrapper = await mountRenderer(node);
+
+        expect(wrapper.find('input').element.value).toBe('hello');
+
+        await wrapper.find('input').setValue('world');
+        await nextTick();
+
+        expect(wrapper.find('span').text()).toBe('world');
+      });
+
+      it('should support modifiers in object format', async () => {
+        const node: JsonNode = {
+          data: { text: '' },
+          com: 'div',
+          children: [
+            {
+              com: 'input',
+              model: { modelValue: 'text.trim' },
+            },
+            { com: 'span', children: '[{{ text }}]' },
+          ],
+        };
+        const wrapper = await mountRenderer(node);
+
+        await wrapper.find('input').setValue('  trimmed  ');
+        await nextTick();
+
+        expect(wrapper.find('span').text()).toBe('[trimmed]');
+      });
+    });
   });
 
   describe('expression evaluation in templates', () => {

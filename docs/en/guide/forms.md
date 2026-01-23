@@ -41,6 +41,123 @@ VSchema supports `model` property for two-way data binding, similar to Vue's `v-
 }
 ```
 
+## Modifiers
+
+VSchema supports three modifiers that can be appended to the binding path:
+
+| Modifier | Description | Example |
+|----------|-------------|---------|
+| `.trim` | Automatically trim whitespace | `"username.trim"` |
+| `.number` | Automatically convert to number | `"age.number"` |
+| `.lazy` | Use change event instead of input | `"content.lazy"` |
+
+### Single Modifier
+
+```json
+{
+  "data": { "username": "", "age": 0 },
+  "com": "div",
+  "children": [
+    {
+      "com": "input",
+      "model": "username.trim",
+      "props": { "placeholder": "Username (auto-trimmed)" }
+    },
+    {
+      "com": "input",
+      "model": "age.number",
+      "props": { "type": "number", "placeholder": "Age" }
+    }
+  ]
+}
+```
+
+### Combined Modifiers
+
+Modifiers can be combined:
+
+```json
+{
+  "com": "input",
+  "model": "price.trim.number",
+  "props": { "placeholder": "Price" }
+}
+```
+
+```json
+{
+  "com": "textarea",
+  "model": "content.trim.lazy",
+  "props": { "placeholder": "Content (updates on blur)" }
+}
+```
+
+## v-model with Arguments
+
+For components supporting multiple v-models (like `v-model:visible`, `v-model:columns`), use object format:
+
+### Basic Usage
+
+```json
+{
+  "data": { "showModal": false },
+  "com": "NModal",
+  "model": {
+    "show": "showModal"
+  },
+  "children": [...]
+}
+```
+
+### Multiple v-models
+
+```json
+{
+  "data": {
+    "tableColumns": [...],
+    "selectedKeys": []
+  },
+  "com": "TableColumnSetting",
+  "model": {
+    "columns": "tableColumns",
+    "checkedKeys": "selectedKeys"
+  }
+}
+```
+
+### modelValue as Default v-model
+
+In object format, `modelValue` represents the default `v-model`:
+
+```json
+{
+  "data": { "inputValue": "", "visible": true },
+  "com": "MyComponent",
+  "model": {
+    "modelValue": "inputValue",
+    "visible": "visible"
+  }
+}
+```
+
+Equivalent to Vue template:
+```vue
+<MyComponent v-model="inputValue" v-model:visible="visible" />
+```
+
+### With Modifiers
+
+Object format also supports modifiers:
+
+```json
+{
+  "com": "NInput",
+  "model": {
+    "value": "username.trim"
+  }
+}
+```
+
 ## Different Input Types
 
 ### Textarea
