@@ -18,7 +18,14 @@ jobs:
         with:
           fetch-depth: 0 # 拉取所有历史，用于生成发布说明
 
-      # 步骤2：自动生成发布说明（可选，基于提交记录）
+      # 步骤2：设置Node.js环境（新增）
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 24 # 根据你的项目需求选择Node版本
+          registry-url: https://registry.npmjs.org/ # 指定npm仓库地址
+
+      # 步骤3：自动生成发布说明
       - name: Generate release notes
         id: release_notes
         run: |
@@ -32,7 +39,7 @@ jobs:
           echo "EOF" >> $GITHUB_ENV
           echo "TAG_NAME=$TAG_NAME" >> $GITHUB_ENV
 
-      # 步骤3：创建GitHub Release
+      # 步骤4：创建GitHub Release
       - name: Create GitHub Release
         uses: softprops/action-gh-release@v2
         with:
@@ -45,3 +52,10 @@ jobs:
         env:
           # 自动使用GitHub Actions的默认令牌授权
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      # 步骤5：发布到npm（新增）
+      - name: Publish to npm
+        run: npm publish --provenance
+        env:
+          # Trusted Publisher 模式下无需手动设置 NPM_TOKEN，GitHub Actions 会自动完成身份验证
+          NODE_AUTH_TOKEN: ${{ secrets.NODE_AUTH_TOKEN }}
