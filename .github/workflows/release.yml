@@ -32,7 +32,7 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: 20 # 建议用20（LTS版本），避免24的兼容性问题
+          node-version: 25 # 建议用20（LTS版本），避免24的兼容性问题
           registry-url: https://registry.npmjs.org/ # 指定npm仓库地址
           cache: 'pnpm' # 现在pnpm已安装，缓存逻辑可正常执行
 
