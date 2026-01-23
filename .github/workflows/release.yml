@@ -18,14 +18,25 @@ jobs:
         with:
           fetch-depth: 0 # 拉取所有历史，用于生成发布说明
 
-      # 步骤2：设置Node.js环境（新增）
+      # 步骤2：设置Node.js环境
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
           node-version: 24 # 根据你的项目需求选择Node版本
           registry-url: https://registry.npmjs.org/ # 指定npm仓库地址
 
-      # 步骤3：自动生成发布说明
+      # 步骤3：安装pnpm（改用官方Action，核心修改）
+      - name: Install pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: 10 # 指定pnpm版本（推荐使用项目实际依赖的版本）
+          run_install: false # 暂时不自动安装依赖，后续手动执行
+
+      # 步骤4：安装项目依赖
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile # 使用frozen-lockfile保证依赖版本一致
+
+      # 步骤5：自动生成发布说明
       - name: Generate release notes
         id: release_notes
         run: |
@@ -39,7 +50,7 @@ jobs:
           echo "EOF" >> $GITHUB_ENV
           echo "TAG_NAME=$TAG_NAME" >> $GITHUB_ENV
 
-      # 步骤4：创建GitHub Release
+      # 步骤6：创建GitHub Release
       - name: Create GitHub Release
         uses: softprops/action-gh-release@v2
         with:
@@ -53,9 +64,9 @@ jobs:
           # 自动使用GitHub Actions的默认令牌授权
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
-      # 步骤5：发布到npm（新增）
+      # 步骤7：发布到npm
       - name: Publish to npm
-        run: npm publish --provenance
+        run: pnpm publish --provenance
         env:
-          # Trusted Publisher 模式下无需手动设置 NPM_TOKEN，GitHub Actions 会自动完成身份验证
+          # Trusted Publisher 模式下无需手动设置 NPM_TOKEN
           NODE_AUTH_TOKEN: ${{ secrets.NODE_AUTH_TOKEN }}
