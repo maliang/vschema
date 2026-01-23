@@ -7,6 +7,9 @@ on:
   # 使用 `master` 分支作为默认分支，请将其更改为 `master`
   push:
     branches: [main]
+    # 仅监控以下路径的文件变更，避免无关代码推送触发构建
+    paths:
+      - 'docs/**'          # 文档核心目录
 
   # 允许你从 Actions 选项卡手动运行此工作流程
   workflow_dispatch:
