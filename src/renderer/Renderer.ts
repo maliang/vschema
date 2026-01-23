@@ -833,6 +833,12 @@ export class Renderer {
     evalContext: EvaluationContext,
     inputType?: string
   ): { props: Record<string, any>; events: Record<string, Function> } {
+    // 确保 modelExpression 是字符串
+    if (typeof modelExpression !== 'string') {
+      console.warn('resolveModel: modelExpression 应为字符串，收到:', typeof modelExpression, modelExpression);
+      return { props: {}, events: {} };
+    }
+    
     // 解析修饰符
     const { path: modelPath, modifiers } = this.parseModelModifiers(modelExpression);
     
@@ -947,6 +953,12 @@ export class Renderer {
     runtimeContext: RuntimeContext,
     evalContext: EvaluationContext
   ): { props: Record<string, any>; events: Record<string, Function> } {
+    // 确保 modelExpression 是字符串
+    if (typeof modelExpression !== 'string') {
+      console.warn('resolveModelWithArg: modelExpression 应为字符串，收到:', typeof modelExpression, modelExpression);
+      return { props: {}, events: {} };
+    }
+    
     // 解析修饰符
     const { path: modelPath, modifiers } = this.parseModelModifiers(modelExpression);
     
