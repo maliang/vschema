@@ -713,6 +713,12 @@ export class EventHandler implements IEventHandler {
       url = context.evaluator.evaluateTemplate(url, evalContext);
     }
 
+    // 解析查询参数中的表达式
+    let params = action.params;
+    if (params) {
+      params = this.evaluateObjectExpressions(params, evalContext, context.evaluator);
+    }
+
     // 解析请求体中的表达式
     let body = action.body;
     if (body !== undefined) {
@@ -734,6 +740,7 @@ export class EventHandler implements IEventHandler {
         {
           ...action,
           fetch: url,
+          params,
           body,
           headers,
         },

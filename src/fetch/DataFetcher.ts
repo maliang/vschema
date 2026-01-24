@@ -96,7 +96,7 @@ export class DataFetcher implements IDataFetcher {
       const response = await this.executeRequest(requestConfig);
 
       // 处理响应
-      return await this.handleResponse(response, requestId);
+      return await this.handleResponse(response, requestId, requestConfig.responseType);
     } catch (error) {
       // 处理错误
       return await this.handleError(error, requestId);
@@ -121,6 +121,20 @@ export class DataFetcher implements IDataFetcher {
       }
     }
 
+    // 添加查询参数
+    if (action.params && Object.keys(action.params).length > 0) {
+      const searchParams = new URLSearchParams();
+      for (const [key, value] of Object.entries(action.params)) {
+        if (value !== undefined && value !== null) {
+          searchParams.append(key, String(value));
+        }
+      }
+      const queryString = searchParams.toString();
+      if (queryString) {
+        url += (url.includes('?') ? '&' : '?') + queryString;
+      }
+    }
+
     // 合并请求头
     const headers: Record<string, string> = {
       ...this.config.defaultHeaders,
@@ -137,6 +151,7 @@ export class DataFetcher implements IDataFetcher {
       method: action.method || 'GET',
       headers,
       body: action.body,
+      responseType: action.responseType,
     };
   }
 
@@ -209,31 +224,27 @@ export class DataFetcher implements IDataFetcher {
   /**
    * 处理响应
    */
-  private async handleResponse(response: Response, requestId: string): Promise<FetchResult> {
+  private async handleResponse(response: Response, requestId: string, responseType?: string): Promise<FetchResult> {
     try {
-      // 解析响应体
-      let data: any;
-      const contentType = response.headers.get('content-type');
-      
-      if (contentType?.includes('application/json')) {
-        data = await response.json();
-      } else {
-        data = await response.text();
-      }
-
       // 检查 HTTP 状态码
       if (!response.ok) {
         // HTTP 错误状态（4xx, 5xx）
+        let errorData: any;
+        try {
+          errorData = await response.json();
+        } catch {
+          errorData = await response.text();
+        }
+        
         const error = new Error(`HTTP ${response.status}: ${response.statusText}`);
         (error as any).status = response.status;
-        (error as any).response = data;
+        (error as any).response = errorData;
 
         // 执行错误拦截器
         if (this.config.errorInterceptor) {
           try {
             await Promise.resolve(this.config.errorInterceptor(error));
           } catch (interceptorError) {
-            // 错误拦截器可能会重新抛出或转换错误
             this.loadingStates.set(requestId, false);
             return {
               success: false,
@@ -241,7 +252,7 @@ export class DataFetcher implements IDataFetcher {
                 ? interceptorError 
                 : new Error(String(interceptorError)),
               status: response.status,
-              response: data,
+              response: errorData,
             };
           }
         }
@@ -251,8 +262,50 @@ export class DataFetcher implements IDataFetcher {
           success: false,
           error,
           status: response.status,
+          response: errorData,
+        };
+      }
+
+      // 根据 responseType 解析响应体
+      let data: any;
+      
+      if (responseType === 'blob') {
+        // Blob 类型直接返回，不进行业务状态码检查
+        data = await response.blob();
+        this.loadingStates.set(requestId, false);
+        return {
+          success: true,
+          data,
+          status: response.status,
           response: data,
         };
+      } else if (responseType === 'arrayBuffer') {
+        data = await response.arrayBuffer();
+        this.loadingStates.set(requestId, false);
+        return {
+          success: true,
+          data,
+          status: response.status,
+          response: data,
+        };
+      } else if (responseType === 'text') {
+        data = await response.text();
+        this.loadingStates.set(requestId, false);
+        return {
+          success: true,
+          data,
+          status: response.status,
+          response: data,
+        };
+      } else {
+        // 默认 JSON 处理
+        const contentType = response.headers.get('content-type');
+        
+        if (contentType?.includes('application/json')) {
+          data = await response.json();
+        } else {
+          data = await response.text();
+        }
       }
 
       // 执行响应拦截器

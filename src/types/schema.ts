@@ -50,7 +50,11 @@ export interface FetchAction {
   fetch: string;
   method?: 'GET' | 'POST' | 'PUT' | 'DELETE' | 'PATCH';
   headers?: Record<string, any>;
+  /** 查询参数（GET 请求） */
+  params?: Record<string, any>;
   body?: any;
+  /** 响应类型：json（默认）、text、blob、arrayBuffer */
+  responseType?: 'json' | 'text' | 'blob' | 'arrayBuffer';
   then?: Action | Action[];
   catch?: Action | Action[];
   /** 无论成功或失败都执行的回调 */

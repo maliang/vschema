@@ -12,6 +12,8 @@ export interface RequestConfig {
   method: string;
   headers: Record<string, string>;
   body?: any;
+  /** 响应类型：json（默认）、text、blob、arrayBuffer */
+  responseType?: 'json' | 'text' | 'blob' | 'arrayBuffer';
 }
 
 /**
