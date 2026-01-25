@@ -44,10 +44,35 @@ VSchema 提供多种方式与后端 API 交互。
 | `fetch` | `string` | API 地址，支持表达式 |
 | `method` | `string` | 请求方法：GET, POST, PUT, DELETE 等 |
 | `headers` | `object` | 请求头 |
+| `params` | `object` | 查询参数（自动拼接到 URL） |
 | `body` | `any` | 请求体 |
+| `responseType` | `string` | 响应类型：json（默认）、text、blob、arrayBuffer |
 | `then` | `Action` | 成功回调，可访问 `$response` |
 | `catch` | `Action` | 失败回调，可访问 `$error` |
 | `finally` | `Action` | 完成回调（无论成功失败） |
+| `ignoreBaseURL` | `boolean` | 是否忽略全局 baseURL |
+
+### 文件下载
+
+使用 `responseType: 'blob'` 下载文件：
+
+```json
+{
+  "fetch": "/api/export",
+  "params": { "type": "excel", "ids": "{{ selectedIds.join(',') }}" },
+  "responseType": "blob",
+  "then": {
+    "call": "$methods.$download",
+    "args": ["{{ $response }}", "导出数据.xlsx"]
+  },
+  "catch": {
+    "call": "$message.error",
+    "args": ["{{ $error.message || '导出失败' }}"]
+  }
+}
+```
+
+> 注意：`blob`、`text`、`arrayBuffer` 类型的响应不会进行业务状态码检查。
 
 ## initApi
 

@@ -66,7 +66,9 @@ interface FetchAction {
   fetch: string;           // API 地址，支持表达式
   method?: 'GET' | 'POST' | 'PUT' | 'DELETE' | 'PATCH';  // 请求方法
   headers?: object;        // 请求头
+  params?: object;         // 查询参数（GET 请求）
   body?: any;              // 请求体
+  responseType?: 'json' | 'text' | 'blob' | 'arrayBuffer';  // 响应类型，默认 'json'
   then?: Action | Action[];    // 成功回调，可访问 $response
   catch?: Action | Action[];   // 失败回调，可访问 $error
   finally?: Action | Action[]; // 完成回调（无论成功失败）
@@ -94,6 +96,34 @@ interface FetchAction {
   "then": { "set": "mockData", "value": "{{ $response }}" }
 }
 ```
+
+### responseType 响应类型
+
+| 值 | 说明 |
+|---|------|
+| `json` | 默认值，自动解析 JSON 响应并进行业务状态码检查 |
+| `text` | 返回原始文本，不进行 JSON 解析 |
+| `blob` | 返回 Blob 对象，用于文件下载 |
+| `arrayBuffer` | 返回 ArrayBuffer，用于二进制数据处理 |
+
+文件下载示例：
+```json
+{
+  "fetch": "/api/export",
+  "params": { "type": "excel" },
+  "responseType": "blob",
+  "then": {
+    "call": "$methods.$download",
+    "args": ["{{ $response }}", "导出数据.xlsx"]
+  },
+  "catch": {
+    "call": "$message.error",
+    "args": ["{{ $error.message || '导出失败' }}"]
+  }
+}
+```
+
+> 注意：当 `responseType` 为 `blob`、`text` 或 `arrayBuffer` 时，响应不会进行业务状态码检查，`$response` 直接返回原始数据。
 
 ## copy - 复制到剪贴板
 

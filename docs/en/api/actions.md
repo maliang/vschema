@@ -49,7 +49,9 @@ interface FetchAction {
   fetch: string;           // API URL, supports expressions
   method?: 'GET' | 'POST' | 'PUT' | 'DELETE' | 'PATCH';  // HTTP method
   headers?: object;        // Request headers
+  params?: object;         // Query parameters (for GET requests)
   body?: any;              // Request body
+  responseType?: 'json' | 'text' | 'blob' | 'arrayBuffer';  // Response type, defaults to 'json'
   then?: Action | Action[];    // Success callback, access $response
   catch?: Action | Action[];   // Error callback, access $error
   finally?: Action | Action[]; // Always callback (success or failure)
@@ -77,6 +79,34 @@ Ignore global baseURL (for local mock, etc.):
   "then": { "set": "mockData", "value": "{{ $response }}" }
 }
 ```
+
+### responseType - Response Types
+
+| Value | Description |
+|-------|-------------|
+| `json` | Default. Parses JSON response and performs business status code check |
+| `text` | Returns raw text without JSON parsing |
+| `blob` | Returns Blob object for file downloads |
+| `arrayBuffer` | Returns ArrayBuffer for binary data processing |
+
+File download example:
+```json
+{
+  "fetch": "/api/export",
+  "params": { "type": "excel" },
+  "responseType": "blob",
+  "then": {
+    "call": "$methods.$download",
+    "args": ["{{ $response }}", "export-data.xlsx"]
+  },
+  "catch": {
+    "call": "$message.error",
+    "args": ["{{ $error.message || 'Export failed' }}"]
+  }
+}
+```
+
+> Note: When `responseType` is `blob`, `text`, or `arrayBuffer`, the response bypasses business status code checking, and `$response` returns the raw data directly.
 
 ## copy - Copy to Clipboard
 

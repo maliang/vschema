@@ -1,6 +1,6 @@
-# AGENTS.md - VSchema Project Guidelines
+# CLAUDE.md - VSchema Project Guidelines
 
-本文档为 AI 代理提供项目上下文和开发指南。
+本文档为 Claude AI 提供项目上下文和开发指南。
 
 ## 项目概述
 
@@ -32,6 +32,10 @@ src/
 ├── registry/            # 组件注册表
 │   └── ComponentRegistry.ts
 └── types/               # TypeScript 类型定义
+    ├── schema.ts        # JsonNode, Action 类型
+    ├── runtime.ts       # ActionContext, EvaluationContext
+    ├── config.ts        # PluginOptions, GlobalConfig
+    └── errors.ts        # 错误类型
 ```
 
 ## 核心类型
@@ -46,17 +50,25 @@ interface JsonNode {
   computed?: Record<string, string>; // 计算属性
   events?: Record<string, Action | Action[]>; // 事件处理
   slots?: Record<string, JsonNode[] | SlotDefinition>; // 插槽
+  
+  // 指令
   if?: string;           // 条件渲染
   show?: string;         // v-show
   for?: string;          // 循环 "item in items"
   key?: string;          // 循环 key
   model?: string | Record<string, string>; // 双向绑定（支持修饰符）
   ref?: string;          // 模板引用
+  
+  // 生命周期
   onMounted?: Action | Action[];
   onUnmounted?: Action | Action[];
   onUpdated?: Action | Action[];
+  
+  // API
   initApi?: ApiConfig;   // 初始化数据请求
   uiApi?: ApiConfig;     // 动态 UI 请求
+  
+  // 监听和方法
   watch?: Record<string, WatchConfig | Action>;
   methods?: Record<string, Action | Action[]>;
 }
@@ -64,21 +76,39 @@ interface JsonNode {
 
 ### Action 类型
 ```typescript
-{ set: 'path', value: any }                    // 状态设置
-{ call: 'methodName', args?: any[] }           // 方法调用
-{ emit: 'eventName', payload?: any }           // 事件触发
-{ fetch: 'url', method?: string, body?: any, then?: Action, catch?: Action, finally?: Action }  // HTTP 请求
-{ ws: 'url', op?: 'connect'|'send'|'close', onMessage?: Action, ... }  // WebSocket
-{ if: 'condition', then: Action, else?: Action }  // 条件动作
-{ script: 'javascript code' }                  // 脚本执行
-{ copy: 'text', then?: Action, catch?: Action }   // 剪贴板复制
+// 状态设置
+{ set: 'path', value: any }
+
+// 方法调用
+{ call: 'methodName', args?: any[] }
+
+// 事件触发
+{ emit: 'eventName', payload?: any }
+
+// HTTP 请求
+{ fetch: 'url', method?: string, body?: any, then?: Action, catch?: Action, finally?: Action }
+
+// WebSocket
+{ ws: 'url', op?: 'connect'|'send'|'close', onMessage?: Action, ... }
+
+// 条件动作
+{ if: 'condition', then: Action, else?: Action }
+
+// 脚本执行
+{ script: 'javascript code' }
+
+// 剪贴板复制
+{ copy: 'text', then?: Action, catch?: Action }
 ```
 
 ### 表达式语法
 ```
-{{ count + 1 }}           {{ user.name }}
-{{ isActive ? 'yes' : 'no' }}   {{ $response.data }}
-{{ $event.target.value }}       {{ $parent.state.value }}
+{{ count + 1 }}
+{{ user.name }}
+{{ isActive ? 'yes' : 'no' }}
+{{ $response.data }}
+{{ $event.target.value }}
+{{ $parent.state.value }}
 ```
 
 ### v-model 修饰符
@@ -96,7 +126,12 @@ model: { "modelValue": "data", "columns": "cols" }  // 多参数绑定
 createVSchemaPlugin({
   baseURL: '/api',
   responseDataPath: 'data',
-  responseFormat: { codeField: 'code', msgField: 'msg', dataField: 'data', successCode: 0 },
+  responseFormat: {
+    codeField: 'code',
+    msgField: 'msg',
+    dataField: 'data',
+    successCode: 0
+  },
   requestInterceptor: (config) => config,
   responseInterceptor: (response) => response,
   errorInterceptor: (error) => error,
@@ -108,10 +143,16 @@ createVSchemaPlugin({
 
 ```typescript
 // 状态管理
-const { state, computed, setState, watch } = useJsonState({ count: 0 }, { double: 'count * 2' });
+const { state, computed, setState, watch } = useJsonState(
+  { count: 0 },
+  { double: 'count * 2' }
+);
 
 // 数据获取
-const { data, loading, error, execute } = useJsonFetch({ fetch: '/api/users' }, { immediate: true });
+const { data, loading, error, execute } = useJsonFetch(
+  { fetch: '/api/users' },
+  { immediate: true }
+);
 
 // 动作执行
 const { executeAction, executeActions } = useJsonActions();
@@ -119,13 +160,15 @@ const { executeAction, executeActions } = useJsonActions();
 
 ## 测试
 
-测试文件与源文件同目录：`*.test.ts`，使用 Vitest + fast-check。
+测试文件与源文件同目录：`*.test.ts`
 
 ```bash
 pnpm test        # 监听模式
 pnpm test --run  # 单次运行
 pnpm test:coverage  # 覆盖率
 ```
+
+使用 Vitest + fast-check 进行属性测试。
 
 ## 常用命令
 
@@ -140,7 +183,8 @@ pnpm docs:dev    # 文档开发
 ## 开发规范
 
 - TypeScript 严格模式
-- 实现细节使用中文注释，公共 API 文档使用英文
+- 实现细节使用中文注释
+- 公共 API 文档使用英文
 - ESLint + Prettier 格式化
 
 ## 添加新 Action 类型
@@ -164,4 +208,6 @@ pnpm docs:dev    # 文档开发
 
 ## 文档
 
-文档位于 `docs/` 目录，使用 VitePress：`docs/` - 中文文档，`docs/en/` - 英文文档
+文档位于 `docs/` 目录，使用 VitePress：
+- `docs/` - 中文文档
+- `docs/en/` - 英文文档
