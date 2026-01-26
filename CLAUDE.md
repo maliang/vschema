@@ -6,7 +6,7 @@
 
 VSchema (vschema-ui) 是一个 Vue 3 插件，通过 JSON Schema 实现声明式 UI 构建。它在运行时将 JSON 定义转换为响应式 Vue 组件，支持状态管理、事件处理、API 请求、WebSocket 通信等功能。
 
-- 版本：1.3.10
+- 版本：1.3.11
 - 零运行时依赖设计
 - 支持 Vue 3.3.0+
 
