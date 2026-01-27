@@ -777,16 +777,41 @@ export class Renderer {
     const resolved: Record<string, any> = {};
 
     for (const [key, value] of Object.entries(props)) {
-      if (typeof value === 'string' && this.evaluator.isTemplateExpression(value)) {
-        // 动态表达式 props
-        resolved[key] = this.evaluator.evaluateTemplate(value, evalContext);
-      } else {
-        // 静态 props
-        resolved[key] = value;
-      }
+      resolved[key] = this.resolveValue(value, evalContext);
     }
 
     return resolved;
+  }
+
+  /**
+   * 递归解析值中的模板表达式
+   * 支持字符串、数组、嵌套对象中的模板表达式
+   */
+  private resolveValue(value: any, evalContext: EvaluationContext): any {
+    if (typeof value === 'string') {
+      // 字符串：检查是否为模板表达式
+      if (this.evaluator.isTemplateExpression(value)) {
+        return this.evaluator.evaluateTemplate(value, evalContext);
+      }
+      return value;
+    }
+
+    if (Array.isArray(value)) {
+      // 数组：递归解析每个元素
+      return value.map(item => this.resolveValue(item, evalContext));
+    }
+
+    if (value !== null && typeof value === 'object') {
+      // 对象：递归解析每个属性
+      const resolved: Record<string, any> = {};
+      for (const [k, v] of Object.entries(value)) {
+        resolved[k] = this.resolveValue(v, evalContext);
+      }
+      return resolved;
+    }
+
+    // 其他类型（number, boolean, null, undefined）直接返回
+    return value;
   }
 
   /**
